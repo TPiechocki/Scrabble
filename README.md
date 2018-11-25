@@ -4,6 +4,19 @@ First project for PP
 
 Changelog:
 
+0.2
+- insert a word instead of letter with check whether player can do it;
+  each action is confirmed with enter or cancelled with escape
+    * create the word below the board; backspace to delete last letter;
+    * position the word within board; arrows move the word and 'o' changes the word orientation
+    * confirm to try putting the word; it is placed or error message is shown
+- first word must be placed through middle
+- rest of words must have at least one letter already on board
+- colors indicate correctness while creating or positioning the words
+- used tiles dissappear from hand
+- check if any of tiles was used to insert a word
+- blanks
+
 0.1
 - display board with border
 - display legend
