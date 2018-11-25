@@ -1,5 +1,4 @@
 #include<stdio.h>
-#include<string.h>
 #include"conio2.h"
 #include"display/display.h"
 
@@ -31,7 +30,6 @@ int main() {
         clrscr();               //clear the screen, fill all with spaces
         textcolor(WHITE);
 
-        boardPosition(&board_status);
         //legend
         displayLegend(board_status);
 
@@ -52,35 +50,41 @@ int main() {
         board_status.ch = getch();
 
         switch (board_status.ch) {
-            case 0:         // it means one of arrows
+            case 0:
                 board_status.zero = 1;              // if this is the case then we read
-                board_status.ch = readArrow(getch());          // the next code knowing that this
+                board_status.ch = getch();          // the next code knowing that this
                 switch (board_status.ch) {           // this is an arrow
-                    case UP:
-                        (board_status.yBoard > 1)?board_status.y--:NULL;
+                    case 0x48:
+                        (boardYPosition(board_status.y) > 1)?board_status.y--:NULL;
                         break;
-                    case DOWN:
-                        (board_status.yBoard < BOARD_SIZE)?board_status.y++:NULL;
+                    case 0x50:
+                        (boardYPosition(board_status.y) < BOARD_SIZE)?board_status.y++:NULL;
                         break;
-                    case LEFT:
-                        (board_status.xBoard > 1)?board_status.x--:NULL;
+                    case 0x4b:
+                        (boardXPosition(board_status.x) > 1)?board_status.x--:NULL;
                         break;
-                    case RIGHT:
-                        (board_status.xBoard < BOARD_SIZE)?board_status.x++:NULL;
+                    case 0x4d:
+                        (boardXPosition(board_status.x) < BOARD_SIZE)?board_status.x++:NULL;
                         break;
                     default:break;
                 }
-                boardPosition(&board_status);
                 break;
-            case 'i':       // for inserting a word
-                insertWord(&board_status, &player);
+            case 'i':
+                player.letter = (char)getch();
+                insertLetter(&board_status, &player);
                 break;
-            case 'n':       // new game with start settings
+            case 'n':
                 defaultSettings(&board_status, &player);
+                break;
+            case ' ':
+                board_status.text_color = (board_status.text_color + 1) % 16;
+                break;
+            case 0x0d:      // "enter" key
+                board_status.background_color = (board_status.background_color + 1) % 16;
                 break;
             default:break;
         }
-    } while (board_status.ch != 'q'); // q for exit
+    } while (board_status.ch != 'q');
 
     _setcursortype(_NORMALCURSOR);      // show the cursor so it will be
                                         // visible after the program ends
@@ -92,7 +96,6 @@ void defaultSettings(board_status_t *board, player_t *player) {
     board->background_color = BLACK;
     board->x = boardXStart();
     board->y = boardYStart();
-    board->firstMove = 1;
     emptyBoard(board);
-    *player = {{-1, 0, 'A', 0, 'O', 0, 'C', 0, 'D', 0, 'G', 0, 'T', 0},};
+    *player = {{'A', 'A', 'O', 'C', 'D', 'G', 'T'}};
 }

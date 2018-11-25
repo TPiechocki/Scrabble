@@ -23,14 +23,11 @@ int boardXStart(void);          // return start coordinates for cursor
 int boardYStart(void);
 
 void displayBorder();       // display a border of a board
-void displayBoard(const board_status_t *board);
+void displayBoard(board_status_t *board);
 
-void displayTiles(const player_tile_t tiles[], int size);        //display player's tiles below a board
+void displayTiles(char tiles[], int size);        //display player's tiles below a board
 
-void displayWordCreate(const player_t player);      // display a word to be inserted below a board
-    // letters in player's hand have green background, letters not available with red background
-void displayWordInsert(board_status_t *board, player_t *player);    // display word on a board
-    // also handles situation, when word goes out of the board
+void displayWord();
 
 #ifdef __cplusplus
 }

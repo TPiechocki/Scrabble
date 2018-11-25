@@ -9,29 +9,35 @@
 
 #include"../core/core.h"
 
-#define HORIZONTAL 0
-#define VERTICAL 1
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct {
+    char tiles[PlAYER_TILES];
     char letter;
-    short used;     // 0 if not used in actual word, 1 if used
-} player_tile_t;
-
-typedef struct {
-    player_tile_t tiles[PLAYER_TILES];  // tiles in player's hand
-    char word[BOARD_SIZE+1];            // word which player tries to insert
-    short word_status[BOARD_SIZE];      // 0 if player doesn't have letter, 1 if has
-    short word_orientaion = VERTICAL;              // vertical or horizontal
     // int points;
 } player_t;
 
+typedef struct {
+    int tile;       // EMPTY or letter
+    int bonus;      // EMPTY, negative for word bonus or positive for letter bonus
+} board_tile_t;
+
+
+typedef struct {
+    int ch;         // key code
+    int text_color;
+    int background_color;
+    int zero;       // check whether key has two character code
+    int x;          // position of cursor
+    int y;
+    board_tile_t board_tiles[BOARD_SIZE][BOARD_SIZE];
+} board_status_t;
+
 void emptyBoard(board_status_t *board);     // fill board tiles with EMPTY
 
-void insertWord(board_status_t *board, player_t *player);   // insert a word on board
+void insertLetter(board_status_t *board, player_t *player);     // insert a letter on board if player can
 
 #ifdef __cplusplus
 }

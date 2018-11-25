@@ -2,9 +2,8 @@
 // Created by Tomasz Piechocki on 20/11/2018.
 //
 
-#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_DEPRECATE
 #include<stdio.h>
-#include <string.h>
 #include"../conio2.h"
 #include"display.h"
 
@@ -20,34 +19,32 @@
 
 EXTERNC
 void displayLegend(board_status_t board) {
-    char test = MIDDLE_TILE + '0';
     int count = 1;
     char txt[32];
     gotoxy(LEGEND_POSITION, count++);
-    putch(test);
     cputs("Tomasz Piechocki, 175690");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("Implemented: a, b, c, d, e, f");
+    cputs("Implemented: a, b, c, d, e");
     count++;
 
     gotoxy(LEGEND_POSITION, count++);
     cputs("arrows  = move cursor");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("q       = exit");
+    cputs("i       = insert letter");
     gotoxy(LEGEND_POSITION, count++);
     cputs("n       = new game");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("enter   = confirm a move");
+    cputs("space   = change color");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("esc     = cancel a move");
+    cputs("enter   = change background color");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("i       = insert word");
+    cputs("q       = exit");
     count++;
 
-    sprintf(txt, "actual position: (%2d,%2d)", board.xBoard, board.yBoard);
+    sprintf(txt, "actual position: (%2d,%2d)", boardXPosition(board.x), boardYPosition(board.y));
     gotoxy(LEGEND_POSITION, count++);
     cputs(txt);
-    if (board.zero) sprintf(txt, "key code: 0x00 %d", board.ch);    //code of last pressed key
+    if (board.zero) sprintf(txt, "key code: 0x00 0x%02x", board.ch);    //code of last pressed key
     else sprintf(txt, "key code: 0x%02x", board.ch);
     gotoxy(LEGEND_POSITION, count++);
     cputs(txt);
@@ -56,12 +53,12 @@ void displayLegend(board_status_t board) {
 
 EXTERNC
 int boardXStart(void) {
-    return BOARD_POSITION + BOARD_PADDING + MIDDLE_TILE;
+    return BOARD_POSITION + BOARD_PADDING + 1;
 }
 
 EXTERNC
 int boardYStart(void) {
-    return BOARD_PADDING + MIDDLE_TILE;
+    return BOARD_PADDING + 1;
 }
 
 EXTERNC
@@ -77,7 +74,7 @@ void displayBorder(){
 }
 
 EXTERNC
-void displayBoard(const board_status_t *board) {
+void displayBoard(board_status_t *board) {
     textattr(BLACK*16 + WHITE);
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
@@ -94,70 +91,10 @@ void displayBoard(const board_status_t *board) {
 }
 
 EXTERNC
-void displayTiles(const player_tile_t tiles[], int size) {
+void displayTiles(char tiles[], int size) {
     for (int i = 0; i < size; ++i) {
         gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 1);
         textattr(WHITE*16+BLACK);
-        if (tiles[i].letter == BLANK)
-            putch('?');
-        else
-            putch(tiles[i].letter);
+        putch(tiles[i]);
     }
-}
-
-EXTERNC
-void displayWordCreate(const player_t player) {
-    for (int i = 0; i <= BOARD_SIZE ; ++i) {
-        gotoxy(5+i,25);
-        putch(' ');
-    }
-    gotoxy(5,25);
-    for (int i = 0; player.word[i] != '\0'; ++i) {
-        if (player.word_status[i] == 0)
-            textattr(RED*16 + WHITE);
-        else if (player.word_status[i] == 1)
-            textattr(GREEN*16 + WHITE);
-        putch(player.word[i]);
-    }
-    textattr(BLACK*16 + WHITE);
-}
-
-EXTERNC
-void displayWordInsert(board_status_t *board, player_t *player) {
-    int length = strlen(player->word);
-    gotoxy(board->x, board->y);
-    if (player->word_orientaion == HORIZONTAL) {
-        for (int i = 0; player->word[i] != '\0'; ++i) {
-            while (boardXPosition(board->x) + length > BOARD_SIZE + 1)
-                board->x--;
-            boardPosition(board);
-            if (board->board_tiles[board->xBoard+i-1][board->yBoard-1].tile == EMPTY ||
-                board->board_tiles[board->xBoard+i-1][board->yBoard-1].tile == player->word[i]) {
-                textattr(GREEN * 16 + WHITE);
-            }
-            else {
-                textattr(RED * 16 + WHITE);
-            }
-            gotoxy(board->x+i, board->y);
-            putch(player->word[i]);
-        }
-    }
-    else {
-        for (int i = 0; player->word[i] != '\0'; ++i) {
-            while(boardYPosition(board->y) + length > BOARD_SIZE+1 )
-                board->y--;
-            boardPosition(board);
-            if (board->board_tiles[board->xBoard-1][board->yBoard+i-1].tile == EMPTY ||
-                board->board_tiles[board->xBoard-1][board->yBoard+i-1].tile == player->word[i]) {
-                textattr(GREEN * 16 + WHITE);
-            }
-            else {
-                textattr(RED * 16 + WHITE);
-            }
-            gotoxy(board->x, board->y + i);
-            putch(player->word[i]);
-        }
-    }
-    boardPosition(board);
-    textattr(BLACK * 16 + WHITE);
 }
