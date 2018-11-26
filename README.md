@@ -7,6 +7,7 @@ Changelog:
 0.3
 - creating a randomized pool
 - take tiles from pool, if there are remaining, when there are empty in hand
+
 fixes:
 - first letter can be placed only if all needed letters are in player's hand
 
