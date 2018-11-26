@@ -4,6 +4,12 @@ First project for PP
 
 Changelog:
 
+0.3
+- creating a randomized pool
+- take tiles from pool, if there are remaining, when there are empty in hand
+fixes:
+- first letter can be placed only if all needed letters are in player's hand
+
 0.2
 - insert a word instead of letter with check whether player can do it;
   each action is confirmed with enter or cancelled with escape

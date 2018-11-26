@@ -54,8 +54,18 @@ void checkLetter(player_t *player) {
         checkLetterUsed(player, i);
     }
 }
+// check if player has all needed tiles in hand
+int checkFirstMoveLetters(player_t *player) {
+    for (int i = 0; player->word[i] != '\0' ; ++i) {
+        if (player->word_status[i] == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 // check if the first move is through the middle
 int checkFirstMove (board_status_t *board, player_t *player) {
+    // check if letter goes through the middle
     boardPosition(board);
     if (player->word_orientaion == HORIZONTAL) {
         if (board->yBoard == MIDDLE_TILE) {
@@ -275,12 +285,30 @@ void emptyBoard(board_status_t *board) {
 EXTERNC
 void insertWord(board_status_t *board, player_t *player) {
     int status = createWord(board, player);
-    if (player->word[0] == '\0')
+    if (player->word[0] == '\0') {
+        error("Word can't be empty.");
         return;
+    }
     if (status == 0x0d) {
+        if(board->firstMove == 1 && checkFirstMoveLetters(player) == 1) {
+            error("In the first move all used letters must be from your tiles.");
+            return;
+        }
         status = positionWord(board, player);
         if (status == 0x0d) {
             placeWord(board, player);        // place a word and check if it can be there
+        }
+    }
+}
+
+EXTERNC
+void takeLetters(board_status_t *board, player_t *player) {
+    if (board->remaining_letters > 0) {
+        for (int i = 0; i < PLAYER_TILES; ++i) {
+            if (player->tiles[i].letter == EMPTY && board->remaining_letters > 0) {
+                player->tiles[i].letter = board->pool[board->remaining_letters - 1];
+                board->remaining_letters--;
+            }
         }
     }
 }

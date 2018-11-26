@@ -3,6 +3,8 @@
 //
 
 #include<stdio.h>
+#include<stdlib.h>
+#include"time.h"
 #include"../conio2.h"
 #include "core.h"
 
@@ -16,11 +18,56 @@
 #define EXTERNC
 #endif
 
-const int AMOUNT_ALL_LETTERS = AMOUNT_OF_A + AMOUNT_OF_B + AMOUNT_OF_C + AMOUNT_OF_D + AMOUNT_OF_E +
-        AMOUNT_OF_F + AMOUNT_OF_F + AMOUNT_OF_G + AMOUNT_OF_H + AMOUNT_OF_I + AMOUNT_OF_J +
-        AMOUNT_OF_K + AMOUNT_OF_L + AMOUNT_OF_M + AMOUNT_OF_N + AMOUNT_OF_O + AMOUNT_OF_P +
-        AMOUNT_OF_Q + AMOUNT_OF_R + AMOUNT_OF_S + AMOUNT_OF_T + AMOUNT_OF_U + AMOUNT_OF_V +
-        AMOUNT_OF_W + AMOUNT_OF_X + AMOUNT_OF_Y + AMOUNT_OF_Z + AMOUNT_OF_BLANK;
+void fillWithLetter(char pool[], int amount, char letter, int *count) {
+    for (int i = 0; i < amount; ++i) {
+        pool[*count] = letter;
+        (*count)++;
+    }
+}
+void fillPool(char pool[]) {
+    int count = 0;
+    fillWithLetter(pool, AMOUNT_OF_A, 'A', &count);
+    fillWithLetter(pool, AMOUNT_OF_B, 'B', &count);
+    fillWithLetter(pool, AMOUNT_OF_C, 'C', &count);
+    fillWithLetter(pool, AMOUNT_OF_D, 'D', &count);
+    fillWithLetter(pool, AMOUNT_OF_E, 'E', &count);
+    fillWithLetter(pool, AMOUNT_OF_F, 'F', &count);
+    fillWithLetter(pool, AMOUNT_OF_G, 'G', &count);
+    fillWithLetter(pool, AMOUNT_OF_H, 'H', &count);
+    fillWithLetter(pool, AMOUNT_OF_I, 'I', &count);
+    fillWithLetter(pool, AMOUNT_OF_J, 'J', &count);
+    fillWithLetter(pool, AMOUNT_OF_K, 'K', &count);
+    fillWithLetter(pool, AMOUNT_OF_L, 'L', &count);
+    fillWithLetter(pool, AMOUNT_OF_M, 'M', &count);
+    fillWithLetter(pool, AMOUNT_OF_N, 'N', &count);
+    fillWithLetter(pool, AMOUNT_OF_O, 'O', &count);
+    fillWithLetter(pool, AMOUNT_OF_P, 'P', &count);
+    fillWithLetter(pool, AMOUNT_OF_Q, 'Q', &count);
+    fillWithLetter(pool, AMOUNT_OF_R, 'R', &count);
+    fillWithLetter(pool, AMOUNT_OF_S, 'S', &count);
+    fillWithLetter(pool, AMOUNT_OF_T, 'T', &count);
+    fillWithLetter(pool, AMOUNT_OF_U, 'U', &count);
+    fillWithLetter(pool, AMOUNT_OF_V, 'V', &count);
+    fillWithLetter(pool, AMOUNT_OF_W, 'W', &count);
+    fillWithLetter(pool, AMOUNT_OF_X, 'X', &count);
+    fillWithLetter(pool, AMOUNT_OF_Y, 'Y', &count);
+    fillWithLetter(pool, AMOUNT_OF_Z, 'Z', &count);
+    fillWithLetter(pool, AMOUNT_OF_BLANK, BLANK, &count);
+}
+void swapPoolElements(char pool[], int i, int index) {
+    char temp;
+    temp = pool[i];
+    pool[i] = pool[index];
+    pool[index] = temp;
+}
+void randomizePool(char pool[]) {
+    srand((unsigned int)time(NULL));
+    int index;
+    for (int i = 0; i < AMOUNT_ALL_LETTERS; ++i) {
+        index = rand() % AMOUNT_ALL_LETTERS;
+        swapPoolElements(pool, i, index);
+    }
+}
 
 EXTERNC
 int readArrow(int ch) {
@@ -99,4 +146,10 @@ char toUpper(char letter) {
         return letter - ('a' - 'A');
     else
         return 1;
+}
+
+EXTERNC
+void createPool(char pool[]) {
+    fillPool(pool);         // fill with proper amount of every letter
+    randomizePool(pool);    // randomize letters inside the array
 }

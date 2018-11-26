@@ -44,12 +44,15 @@ void displayLegend(board_status_t board) {
     cputs("i       = insert word");
     count++;
 
-    sprintf(txt, "actual position: (%2d,%2d)", board.xBoard, board.yBoard);
     gotoxy(LEGEND_POSITION, count++);
+    sprintf(txt, "remaining letters: %d", board.remaining_letters);
     cputs(txt);
+    gotoxy(LEGEND_POSITION, count++);
+    sprintf(txt, "actual position: (%2d,%2d)", board.xBoard, board.yBoard);
+    cputs(txt);
+    gotoxy(LEGEND_POSITION, count++);
     if (board.zero) sprintf(txt, "key code: 0x00 %d", board.ch);    //code of last pressed key
     else sprintf(txt, "key code: 0x%02x", board.ch);
-    gotoxy(LEGEND_POSITION, count++);
     cputs(txt);
 
 }

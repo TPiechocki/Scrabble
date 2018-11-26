@@ -59,7 +59,13 @@ enum{
 extern "C" {
 #endif
 
-extern const int AMOUNT_ALL_LETTERS;
+// count all letters
+const int AMOUNT_ALL_LETTERS =  AMOUNT_OF_A + AMOUNT_OF_B + AMOUNT_OF_C + AMOUNT_OF_D + AMOUNT_OF_E + AMOUNT_OF_F +
+                                AMOUNT_OF_G + AMOUNT_OF_H + AMOUNT_OF_I + AMOUNT_OF_J + AMOUNT_OF_K + AMOUNT_OF_L +
+                                AMOUNT_OF_M + AMOUNT_OF_N + AMOUNT_OF_O + AMOUNT_OF_P + AMOUNT_OF_Q + AMOUNT_OF_R +
+                                AMOUNT_OF_S + AMOUNT_OF_T + AMOUNT_OF_U + AMOUNT_OF_V + AMOUNT_OF_W + AMOUNT_OF_X +
+                                AMOUNT_OF_Y + AMOUNT_OF_Z + AMOUNT_OF_BLANK;
+
 
 typedef struct {
     int tile;       // EMPTY or letter
@@ -69,14 +75,16 @@ typedef struct {
 typedef struct {
     int firstMove;  // 0 if it's not first move, 1 if it's first move and must be placed in middle
     int ch;         // key code
-    int text_color;
-    int background_color;
+    int cursor_text_color;     // colors for cursor
+    int cursor_background_color;
     int zero;       // check whether key has two character code
     int x;          // position of cursor in terminal
     int y;
     int xBoard;     // position of cursor in board
     int yBoard;
     board_tile_t board_tiles[BOARD_SIZE][BOARD_SIZE];
+    char pool[AMOUNT_ALL_LETTERS];
+    int remaining_letters;
 } board_status_t;
 
 
@@ -96,8 +104,7 @@ void error(const char *info);          // error window with information included
 char toUpper(char letter);          // convert lower case to upper case and check if it's actually wanted char
     // return 1 if it's not letter, enter or escape; for rest just return a character
 
-void createPool(board_status_t *board);
-
+void createPool(char pool[]);     // create a random pool
 
 #ifdef __cplusplus
 }

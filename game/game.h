@@ -33,6 +33,8 @@ void emptyBoard(board_status_t *board);     // fill board tiles with EMPTY
 
 void insertWord(board_status_t *board, player_t *player);   // insert a word on board
 
+void takeLetters(board_status_t *board, player_t *player);    // take letters from pool
+
 #ifdef __cplusplus
 }
 #endif

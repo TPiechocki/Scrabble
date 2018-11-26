@@ -31,6 +31,8 @@ int main() {
         clrscr();               //clear the screen, fill all with spaces
         textcolor(WHITE);
 
+        takeLetters(&board_status, &player);
+
         boardPosition(&board_status);
         //legend
         displayLegend(board_status);
@@ -43,8 +45,8 @@ int main() {
 
         // cursor
         gotoxy(board_status.x, board_status.y);
-        textcolor(board_status.text_color);
-        textbackground(board_status.background_color);
+        textcolor(board_status.cursor_text_color);
+        textbackground(board_status.cursor_background_color);
         putch('*');         // draw a star(cursor)
 
         // key action
@@ -88,11 +90,16 @@ int main() {
 }
 
 void defaultSettings(board_status_t *board, player_t *player) {
-    board->text_color = WHITE;
-    board->background_color = BLACK;
+    board->cursor_text_color = WHITE;
+    board->cursor_background_color = BLACK;
     board->x = boardXStart();
     board->y = boardYStart();
     board->firstMove = 1;
     emptyBoard(board);
-    *player = {{-1, 0, 'A', 0, 'O', 0, 'C', 0, 'D', 0, 'G', 0, 'T', 0},};
+    createPool(board->pool);
+    board->remaining_letters = AMOUNT_ALL_LETTERS;
+    for (int i = 0; i < PLAYER_TILES; ++i) {
+        player->tiles[i].letter = EMPTY;
+        player->tiles[i].used = 0;
+    }
 }
