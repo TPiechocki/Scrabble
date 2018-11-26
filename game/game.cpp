@@ -65,7 +65,6 @@ int checkFirstMoveLetters(player_t *player) {
 }
 // check if the first move is through the middle
 int checkFirstMove (board_status_t *board, player_t *player) {
-    // check if letter goes through the middle
     boardPosition(board);
     if (player->word_orientaion == HORIZONTAL) {
         if (board->yBoard == MIDDLE_TILE) {
@@ -284,17 +283,17 @@ void emptyBoard(board_status_t *board) {
 
 EXTERNC
 void insertWord(board_status_t *board, player_t *player) {
-    int status = createWord(board, player);
-    if (player->word[0] == '\0') {
+    int status = createWord(board, player);     // create word below a board, enter to confirm
+    if (player->word[0] == '\0') {  // check if word created is not empty
         error("Word can't be empty.");
         return;
     }
     if (status == 0x0d) {
-        if(board->firstMove == 1 && checkFirstMoveLetters(player) == 1) {
+        if(board->firstMove == 1 && checkFirstMoveLetters(player) == 1) {   // check if player has all letters
             error("In the first move all used letters must be from your tiles.");
             return;
         }
-        status = positionWord(board, player);
+        status = positionWord(board, player);       // position the word within the board, enter to confirm
         if (status == 0x0d) {
             placeWord(board, player);        // place a word and check if it can be there
         }
@@ -303,9 +302,11 @@ void insertWord(board_status_t *board, player_t *player) {
 
 EXTERNC
 void takeLetters(board_status_t *board, player_t *player) {
-    if (board->remaining_letters > 0) {
+    if (board->remaining_letters > 0) {         // check if there are letters left in the pool
         for (int i = 0; i < PLAYER_TILES; ++i) {
+            // take only if player's tile is empty, and there are still letter in the pool
             if (player->tiles[i].letter == EMPTY && board->remaining_letters > 0) {
+                // take a letter from the end of the pool
                 player->tiles[i].letter = board->pool[board->remaining_letters - 1];
                 board->remaining_letters--;
             }

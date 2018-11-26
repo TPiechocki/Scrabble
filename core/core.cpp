@@ -18,12 +18,14 @@
 #define EXTERNC
 #endif
 
+// fill next pool tiles from count position with amount of particular letter
 void fillWithLetter(char pool[], int amount, char letter, int *count) {
     for (int i = 0; i < amount; ++i) {
         pool[*count] = letter;
         (*count)++;
     }
 }
+// fill pool in alphabetical order
 void fillPool(char pool[]) {
     int count = 0;
     fillWithLetter(pool, AMOUNT_OF_A, 'A', &count);
@@ -54,12 +56,14 @@ void fillPool(char pool[]) {
     fillWithLetter(pool, AMOUNT_OF_Z, 'Z', &count);
     fillWithLetter(pool, AMOUNT_OF_BLANK, BLANK, &count);
 }
+// swap two elements with indexes i and index
 void swapPoolElements(char pool[], int i, int index) {
     char temp;
     temp = pool[i];
     pool[i] = pool[index];
     pool[index] = temp;
 }
+// make the pool order random
 void randomizePool(char pool[]) {
     srand((unsigned int)time(NULL));
     int index;
