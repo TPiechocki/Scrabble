@@ -1,6 +1,6 @@
 # Scrabble
 
-First project for PP
+First project for Basics of Programming
 
 Changelog:
 
