@@ -7,9 +7,14 @@ Changelog:
 0.3
 - creating a randomized pool
 - take tiles from pool, if there are remaining, when there are empty in hand
+- end of game window, when player has 0 tiles and pool is empty
+- exchange chosen tiles
+- highlight chosen tiles before action
 
 fixes:
 - first letter can be placed only if all needed letters are in player's hand
+- border changed to letters and numbers
+- function displayAll instead of every thing seperately
 
 0.2
 - insert a word instead of letter with check whether player can do it;
@@ -28,6 +33,6 @@ fixes:
 - display board with border
 - display legend
 - move around the board with the cursor
-- show player's tiles
+- show player's tilespl
 - new game with n key
 - insert one letter on the board

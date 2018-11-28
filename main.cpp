@@ -3,10 +3,6 @@
 #include"conio2.h"
 #include"display/display.h"
 
-/* Comment: in the final program declare appropriate constants, e.g.,
-   to eliminate from your program numerical values by replacing them
-   with well defined identifiers */
-
 // set a default settings on start or new game
 void defaultSettings(board_status_t *board, player_t *player);
 
@@ -31,17 +27,10 @@ int main() {
         clrscr();               //clear the screen, fill all with spaces
         textcolor(WHITE);
 
-        takeLetters(&board_status, &player);
-
         boardPosition(&board_status);
-        //legend
-        displayLegend(board_status);
 
-        // board
-        displayBorder();       // display border of a board
-        displayBoard(&board_status);
-        displayTiles(player.tiles, sizeof(player.tiles) / sizeof(player.tiles[0]));
-                // display tiles in player's hand
+        // display legend, board and player's tiles
+        displayAll(board_status, player);
 
         // cursor
         gotoxy(board_status.x, board_status.y);
@@ -76,13 +65,17 @@ int main() {
                 break;
             case 'i':       // for inserting a word
                 insertWord(&board_status, &player);
+                takeLetters(&board_status, &player);        // fill letters from pool
                 break;
             case 'n':       // new game with start settings
                 defaultSettings(&board_status, &player);
                 break;
+            case 'w':       // exchange chosen tiles
+                exchangeTiles(&board_status, &player);
+                break;
             default:break;
         }
-    } while (board_status.ch != 'q'); // q for exit
+    } while (board_status.ch != 'q' && endOfGame(player) == 0); // q for exit
 
     _setcursortype(_NORMALCURSOR);      // show the cursor so it will be
                                         // visible after the program ends
@@ -102,4 +95,5 @@ void defaultSettings(board_status_t *board, player_t *player) {
         player->tiles[i].letter = EMPTY;
         player->tiles[i].used = 0;
     }
+    takeLetters(board, player);
 }

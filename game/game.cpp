@@ -4,9 +4,11 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #include<string.h>
+#include <stdlib.h>
 #include"../conio2.h"
 #include"game.h"
 #include"../display/display.h"
+
 
 #ifdef __GNUC__
 #include<stdlib.h>
@@ -27,6 +29,7 @@ void restartWordStatus(player_t *player) {
         player->tiles[j].used = 0;
     }
 }
+
 // check if letter is in player's hand, if yes it change status of word and change tile to used, includes BLANKs
 int checkLetterUsed(player_t *player, int i) {     // returns 1 if it change something
     for (int j = 0; j < PLAYER_TILES; ++j) {
@@ -155,13 +158,14 @@ int checkWord (board_status_t *board, player_t *player) {
     }
 	return 0;
 }
+
 // function to create a word below a board before putting it on board
 // returns enter(confirmed word), escape(cancelled word) or 1(error)
 int createWord(board_status_t *board, player_t *player) {
     gotoxy(5,23);
     cputs("Insert a word. Green letters are availabe in your tiles and reds are not.");
     gotoxy(5,24);
-    cputs("Letter turns green if there is tile not used earlier in this word. Blanks are skipped here.");
+    cputs("Letter turns green if there is tile not used earlier in this word. Blanks included.");
     char letter = 0;            // change everything to needed defaults
     int wordcount = 0;
     strcpy(player->word, "\0"); // empty word at start
@@ -218,10 +222,10 @@ int positionWord(board_status_t *board, player_t *player) {
             default:
                 error("Unknown opertaion. Try again.");
                 displayBorder();
-                displayTiles(player->tiles, PLAYER_TILES);
+                displayTiles(player->tiles);
                 break;
         }
-        displayBoard(board);
+        displayBoard(*board);
         displayWordInsert(board, player);
         displayLegend(*board);
     }
@@ -270,6 +274,27 @@ void placeWord(board_status_t *board, player_t *player) {
     }
 }
 
+// functions used in exchange of tiles
+// choose tiles and highlight them with background color
+void chooseTiles(board_status_t *board, player_t *player) {
+    restartWordStatus(player);
+    int choice = 0;
+    do {        // loop ends with confirmation of enter or 'w'
+        displayTilesExchange(player->tiles);        // display with higlighted ones
+        choice = getch();
+        if (choice > '0' && choice <= '0' + PLAYER_TILES) {
+            ++player->tiles[choice-'0' - 1].used %= 2;  // switch between 0 and 1
+        }
+        else if (choice == 0x0d || choice == 'w') {
+            /* void, these characters ends a loop */
+        }
+        else {
+            error("You have to provide number from 1 to 7 to choose tile or enter/w to confirm move.");
+            displayAll(*board, *player);
+        }
+    } while (choice != 0x0d && choice != 'w');
+}
+
 EXTERNC
 void emptyBoard(board_status_t *board) {
     for (int i = 0; i < BOARD_SIZE; ++i) {
@@ -284,11 +309,11 @@ void emptyBoard(board_status_t *board) {
 EXTERNC
 void insertWord(board_status_t *board, player_t *player) {
     int status = createWord(board, player);     // create word below a board, enter to confirm
-    if (player->word[0] == '\0') {  // check if word created is not empty
-        error("Word can't be empty.");
-        return;
-    }
     if (status == 0x0d) {
+        if (player->word[0] == '\0') {  // check if word created is not empty
+            error("Word can't be empty.");
+            return;
+        }
         if(board->firstMove == 1 && checkFirstMoveLetters(player) == 1) {   // check if player has all letters
             error("In the first move all used letters must be from your tiles.");
             return;
@@ -313,3 +338,28 @@ void takeLetters(board_status_t *board, player_t *player) {
         }
     }
 }
+
+EXTERNC
+void exchangeTiles(board_status_t *board, player_t *player) {
+    chooseTiles(board, player);     // player choose with 1-7 (7 is default equality of PLAYER_TILES)
+    int index;
+    for (int i = 0; i < PLAYER_TILES; ++i) {    // check which letters are marked and change them
+        if (player->tiles[i].used == 1) {
+            index = rand () % board->remaining_letters;
+            swapChars(&(player->tiles[i].letter), &(board->pool[index]));
+        }
+    }
+}
+
+EXTERNC
+int endOfGame(player_t player) {
+    for (int i = 0; i < PLAYER_TILES; ++i) {
+        if (player.tiles[i].letter != EMPTY) {
+            return 0;
+        }
+    }
+    error("You don't have tiles and the pool is empty. End of game.");
+    return 1;
+}
+
+

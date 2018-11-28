@@ -74,6 +74,13 @@ void randomizePool(char pool[]) {
 }
 
 EXTERNC
+void swapChars(char *a, char *b) {
+    char temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+EXTERNC
 int readArrow(int ch) {
     switch (ch) {           // this is an arrow
         case 0x48:
@@ -109,7 +116,6 @@ void moveCursor(board_status_t *board, int dir) {
     }
     boardPosition(board);
 }
-
 
 EXTERNC
 void boardPosition(board_status_t *board) {

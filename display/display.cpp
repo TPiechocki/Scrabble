@@ -7,6 +7,8 @@
 #include <string.h>
 #include"../conio2.h"
 #include"display.h"
+#include "display.h"
+
 
 #ifdef __GNUC__
 #include<stdlib.h>
@@ -20,29 +22,36 @@
 
 EXTERNC
 void displayLegend(board_status_t board) {
-    char test = MIDDLE_TILE + '0';
     int count = 1;
     char txt[32];
     gotoxy(LEGEND_POSITION, count++);
-    putch(test);
     cputs("Tomasz Piechocki, 175690");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("Implemented: a, b, c, d, e, f");
+    cputs("Implemented: a, b, c, d, e, f, g");
     count++;
 
     gotoxy(LEGEND_POSITION, count++);
-    cputs("arrows  = move cursor");
+    cputs("arrows    = move cursor");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("q       = exit");
+    cputs("q         = exit");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("n       = new game");
+    cputs("n         = new game");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("enter   = confirm a move");
+    cputs("enter     = confirm a move");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("esc     = cancel a move");
+    cputs("esc       = cancel a move");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("i       = insert word");
+    cputs("i         = insert word");
+    gotoxy(LEGEND_POSITION, count++);
+    cputs("backspace = delete last letter");
+    gotoxy(LEGEND_POSITION, count++);
+    cputs("o         = change word orientation");
+    gotoxy(LEGEND_POSITION, count++);
+    cputs("w         = exchange tiles");
+    gotoxy(LEGEND_POSITION, count++);
+    cputs("1-7       = choose tiles to exchange");
     count++;
+
 
     gotoxy(LEGEND_POSITION, count++);
     sprintf(txt, "remaining letters: %d", board.remaining_letters);
@@ -68,43 +77,74 @@ int boardYStart(void) {
 }
 
 EXTERNC
-void displayBorder(){
-    for (int i = 0; i <= BOARD_SIZE + 1; i++) {
-        for (int j = 0; j <= BOARD_SIZE + 1; j++)
-            if (i==0 || i == BOARD_SIZE + 1 || j == 0 || j == BOARD_SIZE +1) {
-                gotoxy(i+BOARD_PADDING+BOARD_POSITION, j+BOARD_PADDING);
-                textbackground(WHITE);
-                putch(' ');
-            }
-    }
-}
-
-EXTERNC
-void displayBoard(const board_status_t *board) {
-    textattr(BLACK*16 + WHITE);
-    for (int i = 0; i < BOARD_SIZE; ++i) {
-        for (int j = 0; j < BOARD_SIZE; ++j) {
-            gotoxy(i+BOARD_PADDING+BOARD_POSITION+1, j+BOARD_PADDING+1);
-            switch (board->board_tiles[i][j].tile) {
-                case EMPTY:
-                    putch(' ');
-                    break;
-                default:
-                    putch(board->board_tiles[i][j].tile);
+void displayBorder(void){
+    char txt[3];
+    for (int i = -1; i <= BOARD_SIZE + 2; i++) {
+        for (int j = -1; j <= BOARD_SIZE + 2; j++) {
+            if ((i <= 0 || i >= BOARD_SIZE + 1) || (j <= 0 || j >= BOARD_SIZE + 1)) {
+                gotoxy(j + BOARD_PADDING + BOARD_POSITION, i + BOARD_PADDING);
+                textcolor(LIGHTMAGENTA);
+                // write ABCD...
+                if ((i == 0 || i == BOARD_SIZE + 1) && j > 0 && j <= BOARD_SIZE)
+                    putch('A' + j - 1);
+                    // write 1234...
+                else if (j == -1 && i > 0 && i <= BOARD_SIZE) {
+                    sprintf(txt, "%2d", i);
+                    cputs(txt);
+                }
+                else if (j == BOARD_SIZE + 1 && i > 0 && i <= BOARD_SIZE) {
+                    sprintf(txt, "%-2d", i);
+                    cputs(txt);
+                }
             }
         }
     }
 }
 
 EXTERNC
-void displayTiles(const player_tile_t tiles[], int size) {
-    for (int i = 0; i < size; ++i) {
-        gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 1);
+void displayBoard(const board_status_t board) {
+    textattr(BLACK*16 + WHITE);
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            gotoxy(i+BOARD_PADDING+BOARD_POSITION+1, j+BOARD_PADDING+1);
+            switch (board.board_tiles[i][j].tile) {
+                case EMPTY:
+                    putch(' ');
+                    break;
+                default:
+                    putch(board.board_tiles[i][j].tile);
+            }
+        }
+    }
+}
+
+EXTERNC
+void displayTiles(const player_tile_t tiles[]) {
+    for (int i = 0; i < PLAYER_TILES; ++i) {
+        gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 2);
         textattr(WHITE*16+BLACK);
         if (tiles[i].letter == BLANK)
             putch('?');
         else
             putch(tiles[i].letter);
+    }
+}
+
+EXTERNC
+void displayTilesExchange(const player_tile_t tiles[]) {
+    for (int i = 0; i < PLAYER_TILES; ++i) {
+        gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 2);
+        if (tiles[i].used != 0)
+            textattr(BROWN*16 + BLACK);
+        else
+            textattr(WHITE*16+BLACK);
+        if (tiles[i].letter == BLANK)
+            putch('?');
+        else
+            putch(tiles[i].letter);
+        gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 3);
+        textattr(BLACK*16 + LIGHTGRAY);
+        putch('1' + i);
     }
 }
 
@@ -164,3 +204,13 @@ void displayWordInsert(board_status_t *board, player_t *player) {
     boardPosition(board);
     textattr(BLACK * 16 + WHITE);
 }
+
+EXTERNC
+void displayAll(const board_status_t board, const player_t player) {
+    displayLegend(board);
+    displayBorder();
+    displayBoard(board);
+    displayTiles(player.tiles);
+
+}
+

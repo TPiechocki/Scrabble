@@ -10,16 +10,16 @@
 #define BOARD_PADDING 2 // all side board padding
 #define BOARD_SIZE 15   // vertical and horizontal, must be uneven number
 #define MIDDLE_TILE (BOARD_SIZE/2 + 1)  // coordinates of middle tile relative to board
-#define BOARD_LEFT 0    // 1 for board on left and legend on right, 0 for inverse
+#define BOARD_LEFT 1    // 1 for board on left and legend on right, 0 for inverse
 #if BOARD_LEFT == 0         // board and legend x positioning
-#define LEGEND_POSITION 48
-#define BOARD_POSITION 1
+    #define LEGEND_POSITION 48
+    #define BOARD_POSITION 1
 #else
-#define LEGEND_POSITION 2
-    #define BOARD_POSITION 60
+    #define LEGEND_POSITION 2
+    #define BOARD_POSITION 40
 #endif
-#define PLAYER_TILES 7
-#define EMPTY 0
+#define PLAYER_TILES 7      // amount of tiles in hand
+#define EMPTY 0         // empty tile
 // pool content
 #define AMOUNT_OF_A 9
 #define AMOUNT_OF_B 2
@@ -49,6 +49,7 @@
 #define AMOUNT_OF_Z 1
 #define AMOUNT_OF_BLANK 2
 #define BLANK -1
+// direction of arrows
 enum{
     UP=-4,
     DOWN,
@@ -66,12 +67,12 @@ const int AMOUNT_ALL_LETTERS =  AMOUNT_OF_A + AMOUNT_OF_B + AMOUNT_OF_C + AMOUNT
                                 AMOUNT_OF_S + AMOUNT_OF_T + AMOUNT_OF_U + AMOUNT_OF_V + AMOUNT_OF_W + AMOUNT_OF_X +
                                 AMOUNT_OF_Y + AMOUNT_OF_Z + AMOUNT_OF_BLANK;
 
-
+// status about every tile is stored like this
 typedef struct {
     int tile;       // EMPTY or letter
     int bonus;      // EMPTY, negative for word bonus or positive for letter bonus
 } board_tile_t;
-
+// status of many elements about board stored here
 typedef struct {
     int firstMove;  // 0 if it's not first move, 1 if it's first move and must be placed in middle
     int ch;         // key code
@@ -87,6 +88,7 @@ typedef struct {
     int remaining_letters;
 } board_status_t;
 
+void swapChars(char *a, char *b);     // swap values of two char elements
 
 int readArrow(int ch);      // read arrow direction, return UP, DOWN, LEFT or RIGHT
 void moveCursor(board_status_t *board, int dir);

@@ -16,11 +16,13 @@
 extern "C" {
 #endif
 
+// info about each of player's tiles
 typedef struct {
     char letter;
     short used;     // 0 if not used in actual word, 1 if used
+                    // also 1 if player want to exchange this letter
 } player_tile_t;
-
+// store a status of player's actions and general info about each player
 typedef struct {
     player_tile_t tiles[PLAYER_TILES];  // tiles in player's hand
     char word[BOARD_SIZE+1];            // word which player tries to insert
@@ -34,6 +36,10 @@ void emptyBoard(board_status_t *board);     // fill board tiles with EMPTY
 void insertWord(board_status_t *board, player_t *player);   // insert a word on board
 
 void takeLetters(board_status_t *board, player_t *player);    // take letters from pool
+
+void exchangeTiles(board_status_t *board, player_t *player);    // player exchange chosen tiles
+
+int endOfGame(player_t player);     // check if player has no tiles and proper information on screen
 
 #ifdef __cplusplus
 }
