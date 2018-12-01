@@ -8,6 +8,7 @@ Changelog:
 - colored places for bonuses
 - every letter is connected with it's points value
 - letter points below a tile
+- count points including  all bonuses
 
 fixes:
 - 'f' key fixes problems with colours and cursor after resizing the console
