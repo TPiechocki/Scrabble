@@ -27,7 +27,7 @@ void displayLegend(board_status_t board) {
     gotoxy(LEGEND_POSITION, count++);
     cputs("Tomasz Piechocki, 175690");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("Implemented: a, b, c, d, e, f, g, h");
+    cputs("Implemented: a, b, c, d, e, f, g, h, i");
     count++;
 
     gotoxy(LEGEND_POSITION, count++);
@@ -52,6 +52,10 @@ void displayLegend(board_status_t board) {
     cputs("1-7       = choose tiles to exchange");
 	gotoxy(LEGEND_POSITION, count++);
 	cputs("f         = fix after console resize");
+    gotoxy(LEGEND_POSITION, count++);
+    cputs("s         = save a game");
+    gotoxy(LEGEND_POSITION, count++);
+    cputs("l         = load a game");
     count++;
 
     // for now just for one player

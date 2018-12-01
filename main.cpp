@@ -2,6 +2,7 @@
 #include<string.h>
 #include"conio2.h"
 #include"display/display.h"
+#include"game/save.h"
 
 // set a default settings on start or new game
 void defaultSettings(board_status_t *board, player_t *player);
@@ -77,6 +78,12 @@ int main() {
 			case 'f':		// fix after console resize
 				_setcursortype(_NOCURSOR);  // hide the blinking cursor
 				break;
+            case 's':		// save a game
+                saveGame(&board_status, &player);
+                break;
+            case 'l':		// load a game
+                loadGame(&board_status, &player);
+                break;
             default:break;
         }
     } while (board_status.ch != 'q' && endOfGame(player) == 0); // q for exit

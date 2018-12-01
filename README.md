@@ -4,6 +4,10 @@ First project for Basics of Programming
 
 Changelog:
 
+0.5
+- save and load state of the game
+- user can specify save name
+
 0.4
 - colored places for bonuses
 - every letter is connected with it's points value
