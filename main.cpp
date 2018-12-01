@@ -69,14 +69,19 @@ int main() {
                 break;
             case 'n':       // new game with start settings
                 defaultSettings(&board_status, &player);
+				_setcursortype(_NOCURSOR);  // hide the blinking cursor
                 break;
             case 'w':       // exchange chosen tiles
                 exchangeTiles(&board_status, &player);
                 break;
+			case 'f':		// fix after console resize
+				_setcursortype(_NOCURSOR);  // hide the blinking cursor
+				break;
             default:break;
         }
     } while (board_status.ch != 'q' && endOfGame(player) == 0); // q for exit
 
+	clrscr();
     _setcursortype(_NORMALCURSOR);      // show the cursor so it will be
                                         // visible after the program ends
     return 0;
@@ -85,15 +90,20 @@ int main() {
 void defaultSettings(board_status_t *board, player_t *player) {
     board->cursor_text_color = WHITE;
     board->cursor_background_color = BLACK;
-    board->x = boardXStart();
+    board->x = boardXStart();       // set start position of cursor
     board->y = boardYStart();
     board->firstMove = 1;
-    emptyBoard(board);
-    createPool(board->pool);
-    board->remaining_letters = AMOUNT_ALL_LETTERS;
-    for (int i = 0; i < PLAYER_TILES; ++i) {
+    emptyBoard(board);              // empty board with spaces
+    createPool(board->pool);        // create a random pool
+    board->remaining_letters = AMOUNT_ALL_LETTERS;      // set remaining letters to all
+    for (int i = 0; i < PLAYER_TILES; ++i) {    // empty player's tiles
         player->tiles[i].letter = EMPTY;
         player->tiles[i].used = 0;
     }
-    takeLetters(board, player);
+    for (int i = 0; i < NUMBER_OF_PLAYERS; ++i) {       // set points of players to 0
+        board->points[i] = 0;
+    }
+    board->player = 0;                  // start a player 0
+    takeLetters(board, player);         // player takes tiles
+    initializeBonuses(board);           // set bonuses on the board
 }

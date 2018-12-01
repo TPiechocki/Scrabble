@@ -7,6 +7,10 @@
 #ifndef SCRABBLE_CORE_H
 #define SCRABBLE_CORE_H
 
+#define DEFAULT_COLOR BLACK*16 + WHITE
+
+#define NUMBER_OF_PLAYERS 1
+
 #define BOARD_PADDING 2 // all side board padding
 #define BOARD_SIZE 15   // vertical and horizontal, must be uneven number
 #define MIDDLE_TILE (BOARD_SIZE/2 + 1)  // coordinates of middle tile relative to board
@@ -67,7 +71,21 @@ const int AMOUNT_ALL_LETTERS =  AMOUNT_OF_A + AMOUNT_OF_B + AMOUNT_OF_C + AMOUNT
                                 AMOUNT_OF_S + AMOUNT_OF_T + AMOUNT_OF_U + AMOUNT_OF_V + AMOUNT_OF_W + AMOUNT_OF_X +
                                 AMOUNT_OF_Y + AMOUNT_OF_Z + AMOUNT_OF_BLANK;
 
-// status about every tile is stored like this
+// information about letters with points and amount of every letter; amount is not used from here
+// in second dimension 0 = letter type, 1 = points
+#define LETTER_T 0
+#define LETTER_POINTS 1
+extern const short all_letters[][2];
+
+// stores information about all bonus tiles
+// in second dimension 0 = bonus type, 1 = x, 2 = y
+#define BONUS_T 0
+#define BONUS_X 1
+#define BONUS_Y 2
+extern const short bonus_tiles[][3];
+#define AMOUNT_OF_BONUS (sizeof(bonus_tiles)/(3*sizeof(short)))
+
+// status about every tile on board is stored like this
 typedef struct {
     int tile;       // EMPTY or letter
     int bonus;      // EMPTY, negative for word bonus or positive for letter bonus
@@ -86,6 +104,8 @@ typedef struct {
     board_tile_t board_tiles[BOARD_SIZE][BOARD_SIZE];
     char pool[AMOUNT_ALL_LETTERS];
     int remaining_letters;
+    int points[NUMBER_OF_PLAYERS];
+    int player;     // number of player whose move is, start with 0
 } board_status_t;
 
 void swapChars(char *a, char *b);     // swap values of two char elements
@@ -107,6 +127,9 @@ char toUpper(char letter);          // convert lower case to upper case and chec
     // return 1 if it's not letter, enter or escape; for rest just return a character
 
 void createPool(char pool[]);     // create a random pool
+void swapPoolElements(char pool[], int i, int index);   // swap two elements with indexes i and index
+
+void initializeBonuses(board_status_t *board);      // set bonuses for tiles on board
 
 #ifdef __cplusplus
 }

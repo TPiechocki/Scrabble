@@ -4,6 +4,15 @@ First project for Basics of Programming
 
 Changelog:
 
+0.4
+- colored places for bonuses
+- every letter is connected with it's points value
+- letter points below a tile
+
+fixes:
+- 'f' key fixes problems with colours and cursor after resizing the console
+- tiles from exchange are taken in order not randmoly
+
 0.3
 - creating a randomized pool
 - take tiles from pool, if there are remaining, when there are empty in hand

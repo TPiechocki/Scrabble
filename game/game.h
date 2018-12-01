@@ -26,9 +26,9 @@ typedef struct {
 typedef struct {
     player_tile_t tiles[PLAYER_TILES];  // tiles in player's hand
     char word[BOARD_SIZE+1];            // word which player tries to insert
-    short word_status[BOARD_SIZE];      // 0 if player doesn't have letter, 1 if has
-    short word_orientaion = VERTICAL;              // vertical or horizontal
-    // int points;
+    short word_status[BOARD_SIZE];      // 0 if player doesn't have letter, 1 if has, 2 if this letter is blank
+    short word_orientaion = VERTICAL;   // vertical or horizontal
+    int points;                         // player's points
 } player_t;
 
 void emptyBoard(board_status_t *board);     // fill board tiles with EMPTY

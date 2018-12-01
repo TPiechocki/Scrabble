@@ -22,12 +22,12 @@
 
 EXTERNC
 void displayLegend(board_status_t board) {
-    int count = 1;
+    int count = 2;      // increment on every new line
     char txt[32];
     gotoxy(LEGEND_POSITION, count++);
     cputs("Tomasz Piechocki, 175690");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("Implemented: a, b, c, d, e, f, g");
+    cputs("Implemented: a, b, c, d, e, f, g, h");
     count++;
 
     gotoxy(LEGEND_POSITION, count++);
@@ -50,6 +50,15 @@ void displayLegend(board_status_t board) {
     cputs("w         = exchange tiles");
     gotoxy(LEGEND_POSITION, count++);
     cputs("1-7       = choose tiles to exchange");
+	gotoxy(LEGEND_POSITION, count++);
+	cputs("f         = fix after console resize");
+    count++;
+
+    // for now just for one player
+    gotoxy(LEGEND_POSITION, count++);
+    cputs("Player's points: ");
+    sprintf(txt, "%d", board.points[0]);
+    cputs(txt);
     count++;
 
 
@@ -64,6 +73,25 @@ void displayLegend(board_status_t board) {
     else sprintf(txt, "key code: 0x%02x", board.ch);
     cputs(txt);
 
+}
+
+EXTERNC
+void bonusDescription(void) {
+    int count = 5;
+    gotoxy(BOARD_POSITION + 3*BOARD_PADDING + BOARD_SIZE, count++);
+    textbackground(MAGENTA);
+    cputs(" 2x word bonus   ");
+    gotoxy(BOARD_POSITION + 3*BOARD_PADDING + BOARD_SIZE, count++);
+    textbackground(LIGHTRED);
+    cputs(" 3x word bonus   ");
+    gotoxy(BOARD_POSITION + 3*BOARD_PADDING + BOARD_SIZE, count++);
+    textbackground(CYAN);
+    cputs(" 2x letter bonus ");
+    gotoxy(BOARD_POSITION + 3*BOARD_PADDING + BOARD_SIZE, count);
+    textbackground(LIGHTBLUE);
+    cputs(" 3x letter bonus ");
+
+    textattr(DEFAULT_COLOR);
 }
 
 EXTERNC
@@ -103,10 +131,28 @@ void displayBorder(void){
 
 EXTERNC
 void displayBoard(const board_status_t board) {
-    textattr(BLACK*16 + WHITE);
+    textattr(DEFAULT_COLOR);
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             gotoxy(i+BOARD_PADDING+BOARD_POSITION+1, j+BOARD_PADDING+1);
+            // set background color for bonuses
+            switch (board.board_tiles[i][j].bonus) {
+                case -3:        // 3x word bonus
+                    textbackground(LIGHTRED);
+                    break;
+                case -2:        // 2x word bonus
+                    textbackground(MAGENTA);
+                    break;
+                case 2:         // 2x letter bonus
+                    textbackground(CYAN);
+                    break;
+                case 3:         // 3x letter bonus
+                    textbackground(LIGHTBLUE);
+                    break;
+                default:
+                    textbackground(BLACK);
+                    break;
+            }
             switch (board.board_tiles[i][j].tile) {
                 case EMPTY:
                     putch(' ');
@@ -116,17 +162,34 @@ void displayBoard(const board_status_t board) {
             }
         }
     }
+    if (board.firstMove == 1) {         // display MIDDLE OF BOARD if it's first move
+        gotoxy(MIDDLE_TILE + BOARD_PADDING + BOARD_POSITION, MIDDLE_TILE + BOARD_PADDING);
+        textattr(WHITE * 16 + BLACK);
+        putch('+');
+        textattr(DEFAULT_COLOR);
+    }
 }
 
 EXTERNC
 void displayTiles(const player_tile_t tiles[]) {
     for (int i = 0; i < PLAYER_TILES; ++i) {
         gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 2);
-        textattr(WHITE*16+BLACK);
+        textattr(WHITE*16 + BLACK);
         if (tiles[i].letter == BLANK)
             putch('?');
         else
             putch(tiles[i].letter);
+        gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 2 + 1);
+        textattr(DEFAULT_COLOR);
+        if (tiles[i].letter == BLANK) {
+            putch('?');     // we don't know blank value as it takes value of letter it replaces
+        }
+        else {
+            if (all_letters[tiles[i].letter - 'A'][LETTER_POINTS] == 10)
+                putch('X');     // X is as 10 points
+            else
+                putch(all_letters[tiles[i].letter - 'A'][LETTER_POINTS] + '0');
+        }
     }
 }
 
@@ -143,7 +206,7 @@ void displayTilesExchange(const player_tile_t tiles[]) {
         else
             putch(tiles[i].letter);
         gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 3);
-        textattr(BLACK*16 + LIGHTGRAY);
+        textattr(DEFAULT_COLOR);
         putch('1' + i);
     }
 }
@@ -162,7 +225,7 @@ void displayWordCreate(const player_t player) {
             textattr(GREEN*16 + WHITE);
         putch(player.word[i]);
     }
-    textattr(BLACK*16 + WHITE);
+    textattr(DEFAULT_COLOR);
 }
 
 EXTERNC
@@ -208,6 +271,7 @@ void displayWordInsert(board_status_t *board, player_t *player) {
 EXTERNC
 void displayAll(const board_status_t board, const player_t player) {
     displayLegend(board);
+    bonusDescription();
     displayBorder();
     displayBoard(board);
     displayTiles(player.tiles);

@@ -17,7 +17,7 @@ void displayLegend(board_status_t board);   //display a legend, ch is a code of 
                                         // and zero says whether it is special key like e.g. arrows
                                         // with two characters, x and y is the actual position of cursor
 
-
+void bonusDescription(void);        // information about color bonuses
 
 int boardXStart(void);          // return start coordinates for cursor
 int boardYStart(void);
@@ -26,6 +26,7 @@ void displayBorder(void);       // display a border of a board
 void displayBoard(const board_status_t board);
 
 void displayTiles(const player_tile_t tiles[]);        //display player's tiles below a board
+    // below every tile display number of points of this letter, 10 points = X
 void displayTilesExchange(const player_tile_t tiles[]);     // display tiles highlighting tiles to exchange
 
 void displayWordCreate(const player_t player);      // display a word to be inserted below a board
