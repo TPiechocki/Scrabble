@@ -238,7 +238,6 @@ void placeWord(board_status_t *board, player_t *player) {
     int length = strlen(player->word);
     int check = 1;      // check if at least one tile was used
     int status = checkWord(board,player);
-    int letterBonus = 1;
     switch (status) {
         case 0:
             // put the word on board
@@ -264,7 +263,7 @@ void placeWord(board_status_t *board, player_t *player) {
                 }
             }
             // count point for word
-            for (int i = 0; i < length; ++i) {
+            for (int i = 0, letterBonus; i < length; ++i) {
                 letterBonus = 1;
                 if (player->word_status[i] > 1)     // bonus for every letter is stored in word_statsu
                     letterBonus *= player->word_status[i];
@@ -365,7 +364,6 @@ void takeLetters(board_status_t *board, player_t *player) {
 EXTERNC
 void exchangeTiles(board_status_t *board, player_t *player) {
     chooseTiles(board, player);     // player choose with 1-7 (7 is default equality of PLAYER_TILES)
-    int random;
     int count = 0;      // number of tiles exchanged
     for (int i = 0; i < PLAYER_TILES; ++i) {    // check which letters are marked and change them
         if (player->tiles[i].used == 1) {
@@ -374,7 +372,7 @@ void exchangeTiles(board_status_t *board, player_t *player) {
         }
     }
     // randomize letters which came back to the pool
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0, random; i < count; ++i) {
         random = rand () % board->remaining_letters;
         swapPoolElements(board->pool, random, board->remaining_letters-1 - i);
     }

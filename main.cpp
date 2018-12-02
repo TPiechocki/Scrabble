@@ -1,13 +1,30 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<string.h>
 #include"conio2.h"
 #include"display/display.h"
 #include"game/save.h"
+#include"core/dictionary.h"
 
 // set a default settings on start or new game
 void defaultSettings(board_status_t *board, player_t *player);
 
-int main() {
+int main(int argc, char* argv[]) {
+    dict_word_t *head_dict = NULL;      // head of list
+    char dictName[30] = "\0";       // buffer for file name
+    for (int i = 0; i < argc; ++i) {    // look for dictionary name in executing command
+		if (strcmp(argv[i], "-d") == 0)
+			strcpy(dictName, argv[i+1]);
+	}
+    if (strcmp(dictName, "\0") == 0)    // default directory if other is not pointed
+        strcpy(dictName, "479k.txt");
+
+    // create a dictionary, head of list is stored in head_dict
+    if (createDictionary(dictName, head_dict) != 0) {
+        error("Problem with creating the dictionary. Program will close itself.");
+        deleteDictionary(head_dict);    // free the space
+        return 1;
+    }
 
     board_status_t board_status;       // structure with board status: key code, colours, zero to check
     board_status.ch = 0; board_status.zero = 0;   // double character code of keys and coordinates of cursor
@@ -88,6 +105,7 @@ int main() {
         }
     } while (board_status.ch != 'q' && endOfGame(player) == 0); // q for exit
 
+    //deleteDictionary(head_dict);        // free space of dictionary
 	clrscr();
     _setcursortype(_NORMALCURSOR);      // show the cursor so it will be
                                         // visible after the program ends

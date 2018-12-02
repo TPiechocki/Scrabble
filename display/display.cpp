@@ -7,7 +7,6 @@
 #include <string.h>
 #include"../conio2.h"
 #include"display.h"
-#include "display.h"
 
 
 #ifdef __GNUC__
@@ -134,7 +133,7 @@ void displayBorder(void){
 }
 
 EXTERNC
-void displayBoard(const board_status_t board) {
+void displayBoard(board_status_t board) {
     textattr(DEFAULT_COLOR);
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
@@ -175,7 +174,7 @@ void displayBoard(const board_status_t board) {
 }
 
 EXTERNC
-void displayTiles(const player_tile_t tiles[]) {
+void displayTiles(player_tile_t tiles[]) {
     for (int i = 0; i < PLAYER_TILES; ++i) {
         gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 2);
         textattr(WHITE*16 + BLACK);
@@ -198,7 +197,7 @@ void displayTiles(const player_tile_t tiles[]) {
 }
 
 EXTERNC
-void displayTilesExchange(const player_tile_t tiles[]) {
+void displayTilesExchange(player_tile_t tiles[]) {
     for (int i = 0; i < PLAYER_TILES; ++i) {
         gotoxy(BOARD_POSITION + BOARD_PADDING + 2*i + 2, 2*BOARD_PADDING + BOARD_SIZE + 2);
         if (tiles[i].used != 0)
@@ -216,7 +215,7 @@ void displayTilesExchange(const player_tile_t tiles[]) {
 }
 
 EXTERNC
-void displayWordCreate(const player_t player) {
+void displayWordCreate(player_t player) {
     for (int i = 0; i <= BOARD_SIZE ; ++i) {
         gotoxy(5+i,25);
         putch(' ');
@@ -225,7 +224,7 @@ void displayWordCreate(const player_t player) {
     for (int i = 0; player.word[i] != '\0'; ++i) {
         if (player.word_status[i] == 0)
             textattr(RED*16 + WHITE);
-        else if (player.word_status[i] == 1)
+        else if (player.word_status[i] > 0)
             textattr(GREEN*16 + WHITE);
         putch(player.word[i]);
     }
@@ -273,7 +272,7 @@ void displayWordInsert(board_status_t *board, player_t *player) {
 }
 
 EXTERNC
-void displayAll(const board_status_t board, const player_t player) {
+void displayAll(board_status_t board, player_t player) {
     displayLegend(board);
     bonusDescription();
     displayBorder();

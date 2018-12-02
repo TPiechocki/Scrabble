@@ -20,5 +20,5 @@ void loadGame(board_status_t *board, player_t *player);
 #ifdef __cplusplus
 }
 #endif
-#endif //SCRABBLE_GAME_H
+#endif //SCRABBLE_SAVE_H
 

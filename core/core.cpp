@@ -6,7 +6,7 @@
 #include<stdlib.h>
 #include"time.h"
 #include"../conio2.h"
-#include "core.h"
+#include"core.h"
 
 #ifdef __GNUC__
 #include<stdlib.h>
@@ -59,8 +59,7 @@ void fillPool(char pool[]) {
 // make the pool order random
 void randomizePool(char pool[]) {
     srand((unsigned int)time(NULL));
-    int index;
-    for (int i = 0; i < AMOUNT_ALL_LETTERS; ++i) {
+    for (int i = 0, index; i < AMOUNT_ALL_LETTERS; ++i) {
         index = rand() % AMOUNT_ALL_LETTERS;
         swapPoolElements(pool, i, index);
     }

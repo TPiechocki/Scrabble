@@ -2,7 +2,17 @@
 
 First project for Basics of Programming
 
+To append custom dicitonary add in console after program name "-d name-of-file"
 Changelog:
+
+0.6
+- read a dictionary from a file
+- user can specify dictionary name in command line call "-d name_of_file"
+
+fixes:
+- letter used with blank while creating word had no color
+- on save or load backspace handling
+- crash when too long save name
 
 0.5
 - save and load state of the game
