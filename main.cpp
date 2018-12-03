@@ -10,6 +10,7 @@
 void defaultSettings(board_status_t *board, player_t *player);
 
 int main(int argc, char* argv[]) {
+    textmode(C4350);
     dict_word_t *head_dict = NULL;      // head of list
     char dictName[30] = "\0";       // buffer for file name
     for (int i = 0; i < argc; ++i) {    // look for dictionary name in executing command
@@ -101,9 +102,12 @@ int main(int argc, char* argv[]) {
             case 'l':		// load a game
                 loadGame(&board_status, &player);
                 break;
+            case 'r':
+                displayEnd(board_status);
+                board_status.ch = 'q';
             default:break;
         }
-    } while (board_status.ch != 'q' && endOfGame(player) == 0); // q for exit
+    } while (board_status.ch != 'q' && endOfGame(player, board_status) == 0); // q for exit
 
     //deleteDictionary(head_dict);        // free space of dictionary
 	clrscr();

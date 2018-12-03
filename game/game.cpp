@@ -43,7 +43,7 @@ int checkLetterUsed(player_t *player, int i) {     // returns 1 if it change som
     for (int j = 0; j < PLAYER_TILES; ++j) {
         // check for blank if it's not letter
         if (BLANK == player->tiles[j].letter && player->tiles[j].used == 0) {
-            player->word_status[i] = 2;
+            player->word_status[i] = -1;
             player->tiles[j].used = 1;
             return 2;
         }
@@ -162,10 +162,10 @@ int checkWord (board_status_t *board, player_t *player) {   // returns 0 for nor
 // function to create a word below a board before putting it on board
 // returns enter(confirmed word), escape(cancelled word) or 1(error)
 int createWord(board_status_t *board, player_t *player) {
-    gotoxy(5,23);
+    gotoxy(5,38);
     cputs("Insert a word. Green letters are availabe in your tiles and reds are not.");
-    gotoxy(5,24);
-    cputs("Letter turns green if there is tile not used earlier in this word. Blanks included.");
+    gotoxy(5,39);
+    cputs("Blanks take first possible place.");
     char letter = 0;            // change everything to needed defaults
     int wordcount = 0;
     strcpy(player->word, "\0"); // empty word at start
@@ -194,7 +194,7 @@ int createWord(board_status_t *board, player_t *player) {
         checkLetter(player);    // check which letters are in player's tiles
         displayWordCreate(*player);
     }
-    if (letter == 0x0d || letter == 0x1b)       // to check if confrm or cancel
+    if (letter == 0x0d || letter == 0x1b)       // to check if confirm or cancel
         return letter;
     else return 1;                              // error, end without enter or esc
 }
@@ -230,13 +230,33 @@ int positionWord(board_status_t *board, player_t *player) {
     }
     return 1;
 }
+
+// check if player used all tiles, if yes return 50, else 0
+int allTilesUsedPoints(player_t *player) {
+    for (int i = 0; i < PLAYER_TILES; ++i) {
+        if (player->tiles[i].used == 0)
+            return 0;
+    }
+    return 50;
+}
+// count points of letter with letter bonuses
+int pointsLettes(player_t *player, int length) {
+    int points = 0;
+    for (int i = 0, letterBonus; i < length; ++i) {
+        letterBonus = 1;
+        if (player->word_status[i] > 1)     // bonus for every letter is stored in word_status
+            letterBonus *= abs(player->word_status[i]); // absolute because for blanks it is negative
+        points += all_letters[player->word[i]-'A'][LETTER_POINTS] * letterBonus;
+    }
+    return points;
+}
+
 // place a word on the board if it can be done also counts points
 void placeWord(board_status_t *board, player_t *player) {
     boardPosition(board);
-    int points = 0;
-    int multiplier = 1;     // multiplier of word bonus
-    int length = strlen(player->word);
-    int check = 1;      // check if at least one tile was used
+    int points = 0, multiplier = 1, check = 1, length = strlen(player->word);
+    // multiplier is a word bonus, check for testing if all tiles were already on board, if yes then 1
+    // length is the length of the word
     int status = checkWord(board,player);
     switch (status) {
         case 0:
@@ -263,20 +283,18 @@ void placeWord(board_status_t *board, player_t *player) {
                 }
             }
             // count point for word
-            for (int i = 0, letterBonus; i < length; ++i) {
-                letterBonus = 1;
-                if (player->word_status[i] > 1)     // bonus for every letter is stored in word_statsu
-                    letterBonus *= player->word_status[i];
-                points += all_letters[player->word[i]-'A'][LETTER_POINTS] * letterBonus;
-            }
+            points += pointsLettes(player, length);
+            points *= multiplier;       // word bonus is stored in multiplier
+            points += allTilesUsedPoints(player);
             for (int i = 0; i < PLAYER_TILES; ++i) {        // remove used tiles from hand
                 if (player->tiles[i].used == 1) {
                     player->tiles[i].used = 0;
                     player->tiles[i].letter = EMPTY;
-                    check = 0;
+                    check = 0;      // if at least one letter was used than it means the player added letter
                 }
             }
-            if (check)
+            board->points[board->player] += points;     // add calculated points to player's score
+            if (check)      // if all tiles were already on board before this move
                 error("All tiles were already on the board.");
             break;
         case 1:
@@ -292,8 +310,6 @@ void placeWord(board_status_t *board, player_t *player) {
             error("Unknown error.");
             break;
     }
-    points *= multiplier;       // word bonus is stored in multiplier
-    board->points[board->player] += points;     // add calculated points to player's score
 }
 
 // functions used in exchange of tiles
@@ -317,6 +333,54 @@ void chooseTiles(board_status_t *board, player_t *player) {
     } while (choice != 0x0d && choice != 'w');
 }
 
+int checkCreatedWord(board_tile_t board[BOARD_SIZE][BOARD_SIZE], player_t player) {
+    int length = strlen(player.word), lacking = 0;
+    for (int i = 0; i < length; ++i) {
+        if (player.word_status[i] == 0)     // if not in player's tiles
+            lacking++;      // amount of letter lacking in player's hands
+    }
+    for (int i = 0; i < BOARD_SIZE; ++i) {		// j is x coord of board array and i is y coord
+        for (int j = 0; j < BOARD_SIZE; ++j) {	// for every tile on board
+            for (int k = 0; k < length; ++k) {  // for every letter in word
+				if (player.word[k] == board[j][i].tile) {  // if letter from word is in this tile
+
+					// count stands for lacking letters and it is decremented if needed tile is in good posistion
+					// it can be negative if blank is not used in a move
+
+					// check horizontally
+					if (j + (length - k) <= BOARD_SIZE && j - k >= 0) {		// if word is not too long
+						for (int l = 0, status = 0, count = lacking; l < length; ++l) {
+							// if tile on board is different than word letter, than word is not allowed in this place
+							if (board[j - k + l][i].tile != EMPTY && board[j - k + l][i].tile != player.word[l])
+								status = 1;
+							// reduce by one if letter not available in hand or used with blank is the same as the letter on board
+							if (player.word_status[l] <= 0 && board[j - k + l][i].tile == player.word[l])
+								--count;
+							if (l == (length-1) && status == 0 && count <= 0)	// if nothing is wrong for the whole word
+								return 0;
+						}
+					}
+					// check vertically
+					if (i + (length - k) <= BOARD_SIZE && i - k >= 0) {		// if word is not too long
+						for (int l = 0, status = 0, count = lacking; l < length; ++l) {
+							// if tile on board is different than word letter, than word is not allowed in this place
+							if (board[j][i - k + l].tile != EMPTY && player.word[l] != board[j][i - k + l].tile)
+								status = 1;
+							// reduce by one if letter not available in hand or used with blank is the same as the letter on board
+							if (player.word_status[l] <= 0 && board[j][i - k + l].tile == player.word[l])
+								--count;
+							if (l == (length-1) && status == 0 && count <= 0)	// if nothing is wrong for the whole word
+								return 0;
+						}
+					}
+				}
+            }
+        }
+
+    }
+    return 1;	// if there was no proper place then return 0
+}
+
 EXTERNC
 void emptyBoard(board_status_t *board) {
     for (int i = 0; i < BOARD_SIZE; ++i) {
@@ -327,7 +391,6 @@ void emptyBoard(board_status_t *board) {
     }
 }
 
-
 EXTERNC
 void insertWord(board_status_t *board, player_t *player) {
     int status = createWord(board, player);     // create word below a board, enter to confirm
@@ -336,8 +399,14 @@ void insertWord(board_status_t *board, player_t *player) {
             error("Word can't be empty.");
             return;
         }
-        if(board->firstMove == 1 && checkFirstMoveLetters(player) == 1) {   // check if player has all letters
+        // check if player has all letters
+        if(board->firstMove == 1 && checkFirstMoveLetters(player) == 1) {
             error("In the first move all used letters must be from your tiles.");
+            return;
+        }
+        // check if word can be placed anywhere on the board
+        if(board->firstMove == 0 && checkCreatedWord(board->board_tiles, *player) > 0) {
+            error("This word can't be placed anywhere on the board with your letters.");
             return;
         }
         status = positionWord(board, player);       // position the word within the board, enter to confirm
@@ -379,12 +448,12 @@ void exchangeTiles(board_status_t *board, player_t *player) {
 }
 
 EXTERNC
-int endOfGame(player_t player) {
+int endOfGame(player_t player, board_status_t board) {
     for (int i = 0; i < PLAYER_TILES; ++i) {
         if (player.tiles[i].letter != EMPTY) {
             return 0;
         }
     }
-    error("You don't have tiles and the pool is empty. End of game.");
+    displayEnd(board);
     return 1;
 }

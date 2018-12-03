@@ -10,6 +10,12 @@ Changelog:
 - user can specify dictionary name in command line call "-d name_of_file"
 
 fixes:
+- display on end with scores
+- player can skip his move(as long as this is one player game it will cause end of game)
+- check if word can placed just after creating the word
+- 50 point bonus if player used all tiles
+
+fixes:
 - letter used with blank while creating word had no color
 - on save or load backspace handling
 - crash when too long save name

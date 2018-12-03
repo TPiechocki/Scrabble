@@ -26,7 +26,8 @@ typedef struct {
 typedef struct {
     player_tile_t tiles[PLAYER_TILES];  // tiles in player's hand
     char word[BOARD_SIZE+1];            // word which player tries to insert
-    short word_status[BOARD_SIZE];      // 0 if player doesn't have letter, 1 if has, 2 if this letter is blank
+    short word_status[BOARD_SIZE];      // 0 if player doesn't have letter, 1 if has, -1 if it's blank
+                                        // also stores bonus multiplier for letter
     short word_orientaion = VERTICAL;   // vertical or horizontal
 } player_t;
 
@@ -38,7 +39,7 @@ void takeLetters(board_status_t *board, player_t *player);    // take letters fr
 
 void exchangeTiles(board_status_t *board, player_t *player);    // player exchange chosen tiles
 
-int endOfGame(player_t player);     // check if player has no tiles and proper information on screen
+int endOfGame(player_t player, board_status_t board);     // check if player has no tiles, if yes display end message
 
 #ifdef __cplusplus
 }

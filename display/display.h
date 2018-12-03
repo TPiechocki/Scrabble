@@ -37,6 +37,9 @@ void displayWordInsert(board_status_t *board, player_t *player);    // display w
 // display board with border, legend and player's tiles
 void displayAll(board_status_t board, player_t player);
 
+// display on end with scores
+void displayEnd(board_status_t board);
+
 #ifdef __cplusplus
 }
 #endif

@@ -55,6 +55,8 @@ void displayLegend(board_status_t board) {
     cputs("s         = save a game");
     gotoxy(LEGEND_POSITION, count++);
     cputs("l         = load a game");
+    gotoxy(LEGEND_POSITION, count++);
+    cputs("r         = skip move(end game)");
     count++;
 
     // for now just for one player
@@ -217,14 +219,14 @@ void displayTilesExchange(player_tile_t tiles[]) {
 EXTERNC
 void displayWordCreate(player_t player) {
     for (int i = 0; i <= BOARD_SIZE ; ++i) {
-        gotoxy(5+i,25);
+        gotoxy(5+i,40);
         putch(' ');
     }
-    gotoxy(5,25);
+    gotoxy(5, 40);
     for (int i = 0; player.word[i] != '\0'; ++i) {
         if (player.word_status[i] == 0)
             textattr(RED*16 + WHITE);
-        else if (player.word_status[i] > 0)
+        else
             textattr(GREEN*16 + WHITE);
         putch(player.word[i]);
     }
@@ -279,5 +281,24 @@ void displayAll(board_status_t board, player_t player) {
     displayBoard(board);
     displayTiles(player.tiles);
 
+}
+
+EXTERNC
+void displayEnd(board_status_t board) {
+    clrscr();
+    gotoxy(5, 5);
+    cputs("End of game");
+    char txt[30];
+    for (int i = 0; i < NUMBER_OF_PLAYERS; ++i) {
+        gotoxy(5, 8);
+        sprintf(txt, "Player %d:\t%d", i+1, board.points[i]);
+        cputs(txt);
+    }
+    gotoxy(5,20);
+    cputs("Press Enter to close this message...");
+    int quit;
+    do {
+        quit = getch();
+    } while (quit != 0x0d);
 }
 

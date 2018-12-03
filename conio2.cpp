@@ -482,9 +482,9 @@ void textmode(int mode) {
 		thData.height = 25;
 		ResizeConsole(thData.output, 80, 25, 25);
 	} else if(mode == C4350) {
-		thData.width = 80;
+		thData.width = 100;
 		thData.height = 50;
-		ResizeConsole(thData.output, 80, 50, 50);
+		ResizeConsole(thData.output, 100, 50, 50);
 	} else if(mode == LASTMODE) {
 		textmode(thData.lastmode);
 		};
