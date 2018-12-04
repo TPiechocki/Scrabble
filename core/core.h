@@ -85,11 +85,18 @@ extern const short all_letters[][2];
 extern const short bonus_tiles[][3];
 #define AMOUNT_OF_BONUS (sizeof(bonus_tiles)/(3*sizeof(short)))
 
+// struct for list of words - dictionary
+typedef struct dict_word {
+    char *word;
+    struct dict_word *next;
+}dict_word_t;
+
 // status about every tile on board is stored like this
 typedef struct {
     int tile;       // EMPTY or letter
     int bonus;      // EMPTY, negative for word bonus or positive for letter bonus
 } board_tile_t;
+
 // status of many elements about board stored here
 typedef struct {
     int firstMove;  // 0 if it's not first move, 1 if it's first move and must be placed in middle
@@ -106,6 +113,7 @@ typedef struct {
     int remaining_letters;
     int points[NUMBER_OF_PLAYERS];
     int player;     // number of player whose move is, start with 0
+    dict_word_t dictionaryHead;
 } board_status_t;
 
 void swapChars(char *a, char *b);     // swap values of two char elements
@@ -125,6 +133,8 @@ void error(const char *info);          // error window with information included
 // functions for inserting word
 char toUpper(char letter);          // convert lower case to upper case and check if it's actually wanted char
     // return 1 if it's not letter, enter or escape; for rest just return a character
+char *toLowerWord(char *word);      // convert the word to lower case in order to check with dictionary
+
 
 void createPool(char pool[]);     // create a random pool
 void swapPoolElements(char pool[], int i, int index);   // swap two elements with indexes i and index

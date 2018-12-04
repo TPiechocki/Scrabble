@@ -7,6 +7,8 @@
 #include"time.h"
 #include"../conio2.h"
 #include"core.h"
+#include "core.h"
+
 
 #ifdef __GNUC__
 #include<stdlib.h>
@@ -148,6 +150,15 @@ char toUpper(char letter) {
         return letter - ('a' - 'A');
     else
         return 1;
+}
+
+EXTERNC
+char *toLowerWord(char *word) {
+    for (int i = 0; word[i] != '\0' ; ++i) {
+        if (word[i] >= 'A' && word[i] <= 'Z')
+            word[i] = word[i] - ('A'-'a');
+    }
+    return word;
 }
 
 EXTERNC

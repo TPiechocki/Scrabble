@@ -8,6 +8,7 @@
 #include"../conio2.h"
 #include"game.h"
 #include"../display/display.h"
+#include"../core/dictionary.h"
 
 
 #ifdef __GNUC__
@@ -257,6 +258,11 @@ void placeWord(board_status_t *board, player_t *player) {
     int points = 0, multiplier = 1, check = 1, length = strlen(player->word);
     // multiplier is a word bonus, check for testing if all tiles were already on board, if yes then 1
     // length is the length of the word
+    // check with dictionary
+    if (checkDictionary(*board, *player) == 1) {
+        error("Word is not in the dictionary.");
+        return;
+    }
     int status = checkWord(board,player);
     switch (status) {
         case 0:
@@ -312,13 +318,24 @@ void placeWord(board_status_t *board, player_t *player) {
     }
 }
 
-// functions used in exchange of tiles
+// functions used in exchainge of tiles
 // choose tiles and highlight them with background color
 void chooseTiles(board_status_t *board, player_t *player) {
     restartWordStatus(player);
+    int count = 0; // count number of letters chosen
     int choice = 0;
     do {        // loop ends with confirmation of enter or 'w'
-        displayTilesExchange(player->tiles);        // display with higlighted ones
+        count = 0;
+        for (int i = 0; i < PLAYER_TILES; ++i) {    // count amount of letters which player want to exchange
+            if (player->tiles[i].used == 1)
+                ++count;
+        }
+        if (count > board->remaining_letters) {     // if player want to exchange more letters than left in pool
+            error("You can't exchange more letters than letters left in a pool.");
+            restartWordStatus(player);
+            displayAll(*board, *player);
+        }
+        displayTilesExchange(player->tiles);        // display with highlighted ones
         choice = getch();
         if (choice > '0' && choice <= '0' + PLAYER_TILES) {
             ++player->tiles[choice-'0' - 1].used %= 2;  // switch between 0 and 1
@@ -333,6 +350,7 @@ void chooseTiles(board_status_t *board, player_t *player) {
     } while (choice != 0x0d && choice != 'w');
 }
 
+// check if the word created by player can be placed anywhere on the board
 int checkCreatedWord(board_tile_t board[BOARD_SIZE][BOARD_SIZE], player_t player) {
     int length = strlen(player.word), lacking = 0;
     for (int i = 0; i < length; ++i) {

@@ -24,10 +24,10 @@
 // returns 1 if malloc returned null, if everything is okay returns 0
 // add the word to the list with given previous element, word to insert and length of this word
 int addWord(dict_word_t *previous, char *word, int length) {
-    dict_word_t *x = (dict_word_t *)malloc(sizeof(dict_word_t*));
+    dict_word_t *x = (dict_word_t *)malloc(sizeof(dict_word_t)+sizeof(char)*(length+1));
     if (x == NULL)
         return 1;
-	x->word = (char *)malloc(sizeof(char)*(length + 1));
+	x->word = (char *)malloc(sizeof(char)*(length+1));
 	if (x->word == NULL)
 		return 1;
     strcpy(x->word, word);
@@ -36,11 +36,24 @@ int addWord(dict_word_t *previous, char *word, int length) {
     return 0;
 }
 
+int checkWordInDictionary(char *word, dict_word_t head) {
+    word = toLowerWord(word);
+    dict_word_t *wordInDictionary = head.next;
+    while (1) {
+        if (strcmp(word, wordInDictionary->word) == 0) {
+            return 0;
+        }
+        wordInDictionary = wordInDictionary->next;
+        if (wordInDictionary->next == NULL)
+            break;
+    }
+    return 1;
+}
+
 EXTERNC
-int createDictionary(const char *fileName, dict_word_t *head_main) {
+int createDictionary(const char *fileName, board_status_t *board) {
     // initialisation
-    dict_word_t head;
-    head.next = NULL;
+    board->dictionaryHead.next = NULL;
     // fill with words
     FILE *words = fopen(fileName, "r");
     if (words == NULL) {
@@ -50,7 +63,7 @@ int createDictionary(const char *fileName, dict_word_t *head_main) {
     int length;
     char word[100];
 	int status = 0;
-    dict_word_t *previous = &head;
+    dict_word_t *previous = &board->dictionaryHead;
     while (1) {
         status = fscanf(words, "%s\n", word);       // returns 1 if ok
 		length = strlen(word);
@@ -72,7 +85,7 @@ int createDictionary(const char *fileName, dict_word_t *head_main) {
     fclose(words);
 	
     FILE *test = fopen("test.txt", "w");
-    dict_word_t *xxx = head.next;
+    dict_word_t *xxx = board->dictionaryHead.next;
     while (1) {
        fprintf(test, "%s\n", xxx->word);
        xxx = xxx->next;
@@ -80,25 +93,24 @@ int createDictionary(const char *fileName, dict_word_t *head_main) {
            break;
     }
     fclose(test);
-    head_main = head.next;      // change head_main which was argument of function
     return 0;
 }
 
 EXTERNC
-void deleteDictionary(dict_word_t *head) {
-    if (head->next == NULL) // nothing to free
-        return;
-    dict_word_t *next = head->next;
-    dict_word_t *temp;
-    while (1) {
-        if (next->next == NULL) {     // when last
-            free(next);
-            break;
-        }
-        // else
-        temp = next;
-        next = next->next;
-        free(temp);
+int checkDictionary(board_status_t board, player_t player) {
+    if (checkWordInDictionary(player.word, board.dictionaryHead) == 0) {
+        return 0;
+    }
+    return 1;
+}
 
+EXTERNC
+void clearDictionary(dict_word_t *head) {
+    dict_word_t *temp;
+    while (head->next != NULL) {
+        temp = head->next;
+        head->next = head->next->next;
+        free(temp->word);
+        free(temp);
     }
 }

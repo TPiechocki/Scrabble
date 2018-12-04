@@ -2,11 +2,15 @@
 
 First project for Basics of Programming
 
-To append custom dicitonary add in console after program name "-d name-of-file"
+To append custom dicitonary add in console after program name "-d name-of-file".
+Every word in dictionary is stored in a new line. End line symbol is in Windows style (CRLF).
+Other line endings will probably cause an uncaught error, because of different char between the words.
+
 Changelog:
 
 0.6
 - read a dictionary from a file
+- clear space allocated before closing program(fixed)
 - user can specify dictionary name in command line call "-d name_of_file"
 
 fixes:
@@ -14,6 +18,7 @@ fixes:
 - player can skip his move(as long as this is one player game it will cause end of game)
 - check if word can placed just after creating the word
 - 50 point bonus if player used all tiles
+- exchange error, when player wants to exchange more than left in a pool
 
 fixes:
 - letter used with blank while creating word had no color
