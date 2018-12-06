@@ -322,7 +322,6 @@ int countPoints(board_status_t *board, player_t *player) {
                 }
             }
 			if (strlen(word) > 1) {
-				error(word);
 				points += wordPoints(*board, word, strlen(word), (player->word_orientation + 1) % 2, x, y);
 			}
         }
