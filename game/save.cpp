@@ -71,14 +71,21 @@ char *enterName() {
 }
 
 EXTERNC
-void saveGame(board_status_t *board, player_t *player) {
+void saveGame(board_status_t *board, player_t *player, char *dictionary) {
     char *fileName = enterName();       // get name for save
-    if(fileName == NULL)        // if fileName was empty do nothing
+    if(fileName == NULL) {        // if fileName was empty do nothing
+        error("You must enter name.");
         return;
+    }
     char txt[30];
     _mkdir("saves");        // create directory for saves if it does not exits
     sprintf(txt, "saves\\%s", fileName);        // save in folder saves
     FILE *saveFile = fopen(txt, "w");
+    if (saveFile == NULL) {
+        error("Can't create save with this name.");
+        return;
+    }
+    fwrite(dictionary, sizeof(dictionary[0]), 50, saveFile);
 	fwrite(board, sizeof(*board), 1, saveFile);
 	fwrite(player, sizeof(*player), 1, saveFile);
     fclose(saveFile);
@@ -86,7 +93,7 @@ void saveGame(board_status_t *board, player_t *player) {
 }
 
 EXTERNC
-void loadGame(board_status_t *board, player_t *player) {
+void loadGame(board_status_t *board, player_t *player, char *dictionary) {
     char *fileName = enterName(); // get name of file
     if(fileName == NULL)        // if fileName was empty do nothing
         return;
@@ -96,6 +103,7 @@ void loadGame(board_status_t *board, player_t *player) {
     if (saveFile == NULL)       // check if save with this name exist
         error("This save does not exist.");
     else {          // read only if exist
+        fread(dictionary, sizeof(dictionary[0]), 50, saveFile);
         fread(board, sizeof(*board), 1, saveFile);
         fread(player, sizeof(*player), 1, saveFile);
         fclose(saveFile);

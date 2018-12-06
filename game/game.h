@@ -28,7 +28,7 @@ typedef struct {
     char word[BOARD_SIZE+1];            // word which player tries to insert
     int word_status[BOARD_SIZE];      // 0 if player doesn't have letter, 1 if has, -1 if it's blank
                                         // also stores bonus multiplier for letter
-    short word_orientaion = VERTICAL;   // vertical or horizontal
+    short word_orientation = VERTICAL;   // vertical or horizontal
 } player_t;
 
 void emptyBoard(board_status_t *board);     // fill board tiles with EMPTY

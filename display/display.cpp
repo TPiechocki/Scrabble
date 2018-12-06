@@ -26,7 +26,7 @@ void displayLegend(board_status_t board) {
     gotoxy(LEGEND_POSITION, count++);
     cputs("Tomasz Piechocki, 175690");
     gotoxy(LEGEND_POSITION, count++);
-    cputs("Implemented: a, b, c, d, e, f, g, h, i");
+    cputs("Implemented: a b c d e f g h i j");
     count++;
 
     gotoxy(LEGEND_POSITION, count++);
@@ -71,9 +71,9 @@ void displayLegend(board_status_t board) {
     sprintf(txt, "remaining letters: %d", board.remaining_letters);
     cputs(txt);
     gotoxy(LEGEND_POSITION, count++);
-    sprintf(txt, "actual position: (%2d,%2d)", board.xBoard, board.yBoard);
+    sprintf(txt, "actual position: %c%-2d", (char)board.xBoard+'A'-1,  board.yBoard);
     cputs(txt);
-    gotoxy(LEGEND_POSITION, count++);
+    gotoxy(LEGEND_POSITION, count);
     if (board.zero) sprintf(txt, "key code: 0x00 %d", board.ch);    //code of last pressed key
     else sprintf(txt, "key code: 0x%02x", board.ch);
     cputs(txt);
@@ -237,7 +237,7 @@ EXTERNC
 void displayWordInsert(board_status_t *board, player_t *player) {
     int length = strlen(player->word);
     gotoxy(board->x, board->y);
-    if (player->word_orientaion == HORIZONTAL) {
+    if (player->word_orientation == HORIZONTAL) {
         for (int i = 0; player->word[i] != '\0'; ++i) {
             while (boardXPosition(board->x) + length > BOARD_SIZE + 1)
                 board->x--;

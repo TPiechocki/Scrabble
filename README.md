@@ -12,6 +12,9 @@ Changelog:
 - read a dictionary from a file
 - clear space allocated before closing program(fixed)
 - user can specify dictionary name in command line call "-d name_of_file"
+- check if all words created by move are in dictionary
+- loading the save try to load the same dictionary with which it was saved
+- count points for all new words
 
 fixes:
 - display on end with scores
@@ -19,11 +22,10 @@ fixes:
 - check if word can placed just after creating the word
 - 50 point bonus if player used all tiles
 - exchange error, when player wants to exchange more than left in a pool
-
-fixes:
 - letter used with blank while creating word had no color
 - on save or load backspace handling
 - crash when too long save name
+- board coordinates with letter and number(earlier two letters)
 
 0.5
 - save and load state of the game

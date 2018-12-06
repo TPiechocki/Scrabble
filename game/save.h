@@ -14,8 +14,8 @@
 extern "C" {
 #endif
 
-void saveGame(board_status_t *board, player_t *player);
-void loadGame(board_status_t *board, player_t *player);
+void saveGame(board_status_t *board, player_t *player, char *dictionary);
+void loadGame(board_status_t *board, player_t *player, char *dictionary);
 
 #ifdef __cplusplus
 }

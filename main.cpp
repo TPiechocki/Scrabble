@@ -13,21 +13,25 @@ void defaultSettings(board_status_t *board, player_t *player);
 int main(int argc, char* argv[]) {
     textmode(C4350);
 
+    int status = 0;
     board_status_t board_status;       // structure with board status: key code, colours, zero to check
     board_status.ch = 0; board_status.zero = 0;   // double character code of keys and coordinates of cursor
     player_t player;             // player status with: tiles
     defaultSettings(&board_status, &player);
 
+    board_status.dictionaryHead.next = NULL;
     char dictName[30] = "\0";       // buffer for file name
     for (int i = 0; i < argc; ++i) {    // look for dictionary name in executing command
         if (strcmp(argv[i], "-d") == 0)
             strcpy(dictName, argv[i+1]);
     }
     if (strcmp(dictName, "\0") == 0)    // default directory if other is not pointed
-        strcpy(dictName, "dictlarge.txt");
-
+        strcpy(dictName, "dict.txt");
     // create a dictionary, head of list is stored in head_dict
     if (createDictionary(dictName, &board_status) != 0) {
+        if (createDictionary(dictName, &board_status) == 2) {
+            error("This dictionary does not exist.");
+        }
         error("Problem with creating the dictionary. Program will close itself.");
         clearDictionary(&board_status.dictionaryHead);
         return 1;
@@ -44,6 +48,7 @@ int main(int argc, char* argv[]) {
     _setcursortype(_NOCURSOR);  // hide the blinking cursor
     do {
         textbackground(BLACK);
+
         clrscr();               //clear the screen, fill all with spaces
         textcolor(WHITE);
 
@@ -98,10 +103,21 @@ int main(int argc, char* argv[]) {
 				_setcursortype(_NOCURSOR);  // hide the blinking cursor
 				break;
             case 's':		// save a game
-                saveGame(&board_status, &player);
+                saveGame(&board_status, &player, dictName);
                 break;
             case 'l':		// load a game
-                loadGame(&board_status, &player);
+                loadGame(&board_status, &player, dictName);
+                // create the same dictionary as in the previous game
+                status = createDictionary(dictName, &board_status);
+
+                if (status == 2) {
+                    error("Dictionary from save is not available. Session dictionary is not changed.");
+                }
+                else if (status != 0) {
+                    error("Problem with creating the dictionary. Program will close itself.");
+                    clearDictionary(&board_status.dictionaryHead);
+                    return 1;
+                }
                 break;
             case 'r':
                 displayEnd(board_status);
@@ -137,5 +153,4 @@ void defaultSettings(board_status_t *board, player_t *player) {
     board->player = 0;                  // start a player 0
     takeLetters(board, player);         // player takes tiles
     initializeBonuses(board);           // set bonuses on the board
-    board->dictionaryHead.next = NULL;
 }

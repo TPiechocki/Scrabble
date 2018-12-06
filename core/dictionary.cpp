@@ -6,6 +6,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
+#include"../conio2.h"
 #include"dictionary.h"
 #include"core.h"
 #include "dictionary.h"
@@ -35,10 +36,11 @@ int addWord(dict_word_t *previous, char *word, int length) {
     previous->next = x;
     return 0;
 }
-
+// check if the word is in the dictionary somewhere, return 0 if yes, 1 if not
 int checkWordInDictionary(char *word, dict_word_t head) {
     word = toLowerWord(word);
     dict_word_t *wordInDictionary = head.next;
+    char txt[50];
     while (1) {
         if (strcmp(word, wordInDictionary->word) == 0) {
             return 0;
@@ -47,19 +49,113 @@ int checkWordInDictionary(char *word, dict_word_t head) {
         if (wordInDictionary->next == NULL)
             break;
     }
+    sprintf(txt, "Word: \"%s\" is not in dictionary.", word);
+    error(txt);
     return 1;
+}
+//  make the word including letters before and after word placed by player; buffer returned in array word
+void beforeAfterWord(board_status_t board, player_t player, char word[BOARD_SIZE+1]) {
+    int count = 0, length = strlen(player.word);
+    if (player.word_orientation == HORIZONTAL) {
+        // letters before the word
+        for (int i = 1; board.board_tiles[board.xBoard-i-1][board.yBoard-1].tile != EMPTY; ++i) {
+            count++;
+        }
+        // write them in proper order
+        for (int i = count; i > 0; --i) {
+            word[count - i] = (char)board.board_tiles[board.xBoard-i-1][board.yBoard-1].tile;
+        }
+        // concatenate the word itself
+        strcat(word, player.word);
+        count += length;
+        // letters after word
+        for (int i = length; board.board_tiles[board.xBoard+i-1][board.yBoard-1].tile != EMPTY; ++i) {
+            word[count] = (char)board.board_tiles[board.xBoard+i-1][board.yBoard-1].tile;
+            count++;
+        }
+        word[count+1] = '\0';
+    }
+    else if (player.word_orientation == VERTICAL) {
+        // letters before the word
+        for (int i = 1; board.board_tiles[board.xBoard-1][board.yBoard-i-1].tile != EMPTY; ++i) {
+            count++;
+        }
+        // write them in proper order
+        for (int i = count; i > 0; --i) {
+            word[count - i] = (char)board.board_tiles[board.xBoard-1][board.yBoard-i-1].tile;
+        }
+        // concatenate the word itself
+        strcat(word, player.word);
+        count += length;
+        // letters after word
+        for (int i = length; board.board_tiles[board.xBoard-1][board.yBoard+i-1].tile != EMPTY; ++i) {
+            word[count] = (char)board.board_tiles[board.xBoard-1][board.yBoard+i-1].tile;
+            count++;
+        }
+        word[count+1] = '\0';
+    }
+}
+//  look for word around the letter, position is the position of letter in a word which starts with 0
+void aroundLetter(board_status_t board, player_t player, char word[BOARD_SIZE+1], int position) {
+    // check for tiles which were on board before player's move
+    if (player.word_orientation == HORIZONTAL) {
+        if (board.board_tiles[board.xBoard+position - 1][board.yBoard - 1].tile == EMPTY) {
+            int count = 0;
+            // letters before player's letter
+            for (int i = 1; board.board_tiles[board.xBoard+position - 1][board.yBoard - i - 1].tile != EMPTY; ++i) {
+                count++;
+            }
+            // write them in proper order
+            for (int i = count; i > 0; --i) {
+                word[count - i] = (char) board.board_tiles[board.xBoard+position - 1][board.yBoard - i - 1].tile;
+            }
+            // add letter already from player's word
+            word[count] = player.word[position];
+            ++count;
+            // letters after player's letter
+            for (int i = 1; board.board_tiles[board.xBoard+position - 1][board.yBoard + i - 1].tile != EMPTY; ++i) {
+                word[count] = (char) board.board_tiles[board.xBoard+position - 1][board.yBoard + i - 1].tile;
+                count++;
+            }
+            word[count + 1] = '\0';
+        }
+    }
+    else if (player.word_orientation == VERTICAL) {
+        if (board.board_tiles[board.xBoard- 1][board.yBoard+position - 1].tile == EMPTY) {
+            int count = 0;
+            // letters before player's letter
+            for (int i = 1; board.board_tiles[board.xBoard - i - 1][board.yBoard+position - 1].tile != EMPTY; ++i) {
+                count++;
+            }
+            // write them in proper order
+            for (int i = count; i > 0; --i) {
+                word[count - i] = (char) board.board_tiles[board.xBoard - i - 1][board.yBoard+position - 1].tile;
+            }
+            // add letter already from player's word
+            word[count] = player.word[position];
+            ++count;
+            // letters after player's letter
+            for (int i = 1; board.board_tiles[board.xBoard + i - 1][board.yBoard+position - 1].tile != EMPTY; ++i) {
+                word[count] = (char) board.board_tiles[board.xBoard + i - 1][board.yBoard+position - 1].tile;
+                count++;
+            }
+            word[count + 1] = '\0';
+        }
+    }
 }
 
 EXTERNC
 int createDictionary(const char *fileName, board_status_t *board) {
-    // initialisation
-    board->dictionaryHead.next = NULL;
+    clrscr();
+    gotoxy(15, 15);
+    cputs("Loading dictionary...");
     // fill with words
     FILE *words = fopen(fileName, "r");
     if (words == NULL) {
-        error("This dictionary does not exist.");
-        return 1;
+        return 2;
     }
+    // initialisation
+    board->dictionaryHead.next = NULL;
     int length;
     char word[100];
 	int status = 0;
@@ -93,15 +189,27 @@ int createDictionary(const char *fileName, board_status_t *board) {
            break;
     }
     fclose(test);
+    clrscr();
     return 0;
 }
 
 EXTERNC
 int checkDictionary(board_status_t board, player_t player) {
-    if (checkWordInDictionary(player.word, board.dictionaryHead) == 0) {
-        return 0;
+    char word[BOARD_SIZE+1] = "\0";
+    // search whether there are letters before or after inserted word
+    beforeAfterWord(board, player, word);
+    if (checkWordInDictionary(word, board.dictionaryHead) == 1) {
+        return 1;
     }
-    return 1;
+    memset(word, '\0', BOARD_SIZE+1);   // clear the whole word
+    // search for new words around new letters
+    for (int i = 0; player.word[i] != '\0' ; ++i) {
+        aroundLetter(board, player, word, i);
+        if (strlen(word) > 1 && checkWordInDictionary(word, board.dictionaryHead) == 1) {
+            return 1;
+        }
+    }
+    return 0;   // when all letters are in dictionary
 }
 
 EXTERNC

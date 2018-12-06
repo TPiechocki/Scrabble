@@ -21,7 +21,6 @@
 #define EXTERNC
 #endif
 
-// restart a status of word being inserted
 void restartWordStatus(player_t *player) {
     for (int i = 0; i < BOARD_SIZE; ++i) {
         player->word_status[i] = 0;
@@ -70,23 +69,21 @@ int checkFirstMoveLetters(player_t *player) {
 // check if the first move is through the middle
 int checkFirstMove (board_status_t *board, player_t *player) {
     boardPosition(board);
-    if (player->word_orientaion == HORIZONTAL) {
+    if (player->word_orientation == HORIZONTAL) {
         if (board->yBoard == MIDDLE_TILE) {
             for (int i = 0; player->word[i] != '\0'; ++i) {
                 if (board->xBoard + i == MIDDLE_TILE) {
-                    board->firstMove = 0;
                     return 0;
                 }
 
             }
         }
     }
-    else if (player->word_orientaion == VERTICAL) {
+    else if (player->word_orientation == VERTICAL) {
         if (board->xBoard == MIDDLE_TILE) {
             for (int i = 0; player->word[i] != '\0'; ++i) {
                 if (board->yBoard + i == MIDDLE_TILE) {
                     {
-                        board->firstMove = 0;
                         return 0;
                     }
                 }
@@ -98,13 +95,13 @@ int checkFirstMove (board_status_t *board, player_t *player) {
 // check for other words than first if at least one board tile, under word to placed, contains a letter
 int checkMove(board_status_t *board, player_t *player) {
     boardPosition(board);
-    if (player->word_orientaion == HORIZONTAL) {
+    if (player->word_orientation == HORIZONTAL) {
         for (int i = 0; player->word[i] != '\0' ; ++i) {
             if (board->board_tiles[board->xBoard+i-1][board->yBoard-1].tile != EMPTY)
                 return 0;
         }
     }
-    else if (player->word_orientaion == VERTICAL) {
+    else if (player->word_orientation == VERTICAL) {
         for (int i = 0; player->word[i] != '\0' ; ++i) {
             if (board->board_tiles[board->xBoard-1][board->yBoard+i-1].tile != EMPTY)
                 return 0;
@@ -127,7 +124,7 @@ int checkWord (board_status_t *board, player_t *player) {   // returns 0 for nor
             return 3;
         }
     }
-    if (player->word_orientaion == HORIZONTAL) {
+    if (player->word_orientation == HORIZONTAL) {
         for (int i = 0; i < length; ++i) {
             if (board->board_tiles[board->xBoard+i-1][board->yBoard-1].tile != EMPTY &&
                board->board_tiles[board->xBoard+i-1][board->yBoard-1].tile != player->word[i]) {
@@ -142,7 +139,7 @@ int checkWord (board_status_t *board, player_t *player) {   // returns 0 for nor
             }
         }
     }
-    else if (player->word_orientaion == VERTICAL) {
+    else if (player->word_orientation == VERTICAL) {
         for (int i = 0; i < length; ++i) {
             if(board->board_tiles[board->xBoard-1][board->yBoard+i-1].tile != EMPTY &&
                board->board_tiles[board->xBoard-1][board->yBoard+i-1].tile != player->word[i]) {
@@ -201,7 +198,7 @@ int createWord(board_status_t *board, player_t *player) {
 }
 // display position on board and change it with cursor movement
 int positionWord(board_status_t *board, player_t *player) {
-    player->word_orientaion = HORIZONTAL;
+    player->word_orientation = HORIZONTAL;
     displayWordInsert(board, player);
     int ch = 0;
     while (ch != '0x0d' && ch !='0x1b') {       // wait for enter or escape
@@ -212,10 +209,10 @@ int positionWord(board_status_t *board, player_t *player) {
                 moveCursor(board, ch);
                 break;
             case 'o':   // change word orientation
-                if (player->word_orientaion == HORIZONTAL)
-                    player->word_orientaion = VERTICAL;
+                if (player->word_orientation == HORIZONTAL)
+                    player->word_orientation = VERTICAL;
                 else
-                    player->word_orientaion = HORIZONTAL;
+                    player->word_orientation = HORIZONTAL;
                 break;
             case 0x0d:      // enter to confirm
             case 0x1b:      // esc to cancel action
@@ -240,58 +237,136 @@ int allTilesUsedPoints(player_t *player) {
     }
     return 50;
 }
-// count points of letter with letter bonuses
-int pointsLettes(player_t *player, int length) {
-    int points = 0;
-    for (int i = 0, letterBonus; i < length; ++i) {
-        letterBonus = 1;
-        if (player->word_status[i] > 1)     // bonus for every letter is stored in word_status
-            letterBonus *= abs(player->word_status[i]); // absolute because for blanks it is negative
-        points += all_letters[player->word[i]-'A'][LETTER_POINTS] * letterBonus;
+
+// count points for the word
+// arguments: board struct, word, length of word, word orientation and coordinates relative to board(from 1)
+int wordPoints(board_status_t board, char *word, int length, int orientation, int x, int y) {
+    int points = 0, multiplier = 1, letterbonus;     // word multiplier
+    if (orientation == HORIZONTAL) {
+        for (int i = 0; i < length; ++i) {
+            letterbonus = 1;
+            if (board.board_tiles[x+i-1][y-1].bonus < 0)
+                multiplier *= abs(board.board_tiles[x+i-1][y-1].bonus);
+            else if (board.board_tiles[x+i-1][y-1].bonus > 0)
+                letterbonus *= abs(board.board_tiles[x+i-1][y-1].bonus);
+            points += all_letters[word[i]-'A'][LETTER_POINTS] * letterbonus;
+        }
+    }
+    else if (orientation == VERTICAL) {
+        for (int i = 0; i < length; ++i) {
+            letterbonus = 1;
+            if (board.board_tiles[x-1][y+i-1].bonus < 0)
+                multiplier *= abs(board.board_tiles[x-1][y+i-1].bonus);
+            else if (board.board_tiles[x-1][y+i-1].bonus > 0)
+                letterbonus *= abs(board.board_tiles[x-1][y+i-1].bonus);
+            points += all_letters[word[i]-'A'][LETTER_POINTS] * letterbonus;
+        }
+    }
+    return points * multiplier;
+}
+
+// count points of all words which was created with this move
+// specific comments just for first word creation, because all 4 parts are quite similar
+int countPoints(board_status_t *board, player_t *player) {
+    int points = 0, x = board->xBoard, y = board->yBoard, count = 0;
+    char word[BOARD_SIZE+1] = "\0";
+    // main word extended with letters just before or after placed word
+    if (player->word_orientation == HORIZONTAL) {
+        // look for letters before first player's word letter and move start coordinates
+        while (board->board_tiles[x-2][y-1].tile != EMPTY) {
+            --x;
+        }
+        for (int i = 0; i < board->xBoard - x; ++i) {
+            word[count++] = (char)board->board_tiles[x-1+i][y-1].tile;
+        }
+        // add the part which is a player's word
+        strcat(word, player->word);
+        count += strlen(player->word);
+        // look for letters just after player's word
+        for (int i = 0; board->board_tiles[board->xBoard+strlen(player->word)-1+i][y-1].tile != EMPTY; ++i) {
+            word[count++] = (char)board->board_tiles[board->xBoard+strlen(player->word)-1+i][y-1].tile;
+        }
+    }
+    else if (player->word_orientation == VERTICAL) {
+        while (board->board_tiles[x-1][y-2].tile != EMPTY) {
+            --y;
+        }
+        for (int i = 0; i < board->yBoard - y; ++i) {
+            word[count++] = (char)board->board_tiles[x-1][y-1+i].tile;
+        }
+        strcat(word, player->word);
+        count += strlen(player->word);
+        for (int i = 0; board->board_tiles[x-1][board->yBoard+strlen(player->word)-1+i].tile != EMPTY; ++i) {
+            word[count++] = (char)board->board_tiles[x-1][board->yBoard+strlen(player->word)-1+i].tile;
+        }
+    }
+    points += wordPoints(*board, word, strlen(word), player->word_orientation, x, y);
+	memset(word, '\0', BOARD_SIZE + 1);   // clear the whole word
+    // new words around placed letters, quite similar to looking for words to check with dictionary
+    if (player->word_orientation == HORIZONTAL) {           // then possible vertical new other words
+        for (unsigned int i = 0; i < strlen(player->word); ++i) {
+            if (board->board_tiles[board->xBoard-1+i][board->yBoard-1].tile == EMPTY) {
+                x = board->xBoard + i, y = board->yBoard, count = 0;
+                memset(word, '\0', BOARD_SIZE + 1);   // clear the whole word
+                while (board->board_tiles[x - 1][y - 2].tile != EMPTY) {
+                    --y;
+                    ++count;
+                }
+                for (int j = 0; j < count; ++j) {
+                    word[j] = (char) board->board_tiles[x - 1][y - 1 + j].tile;
+                }
+                word[count++] = player->word[i];    // this time player's part is just a one letter
+                for (int j = 0; board->board_tiles[x - 1][y - 1 + count].tile != EMPTY; ++j) {
+                    word[count] = (char) board->board_tiles[x - 1][y - 1 + count].tile;
+                    ++count;
+                }
+            }
+			if (strlen(word) > 1) {
+				error(word);
+				points += wordPoints(*board, word, strlen(word), (player->word_orientation + 1) % 2, x, y);
+			}
+        }
+    }
+    else if (player->word_orientation == VERTICAL) { // then possible horizontal new other words
+        for (unsigned int i = 0; i < strlen(player->word); ++i) {
+            if (board->board_tiles[board->xBoard-1][board->yBoard-1+i].tile == EMPTY) {
+                x = board->xBoard, y = board->yBoard + i, count = 0;
+                memset(word, '\0', BOARD_SIZE + 1);   // clear the whole word
+                while (board->board_tiles[x - 2][y - 1].tile != EMPTY) {
+                    --x;
+                    ++count;
+                }
+				for (int j = 0; j < count; ++j) {
+                    word[j] = (char) board->board_tiles[x - 1 + j][y - 1].tile;
+                }
+                word[count++] = player->word[i];
+                for (int j = 0; board->board_tiles[x - 1 + count][y - 1].tile != EMPTY; ++j) {
+                    word[count] = (char) board->board_tiles[x - 1 + count][y - 1].tile;
+                    ++count;
+                }
+            }
+			if (strlen(word) > 1) {
+				points += wordPoints(*board, word, strlen(word), (player->word_orientation + 1) % 2, x, y);
+			}
+        }
     }
     return points;
 }
-
 // place a word on the board if it can be done also counts points
 void placeWord(board_status_t *board, player_t *player) {
     boardPosition(board);
-    int points = 0, multiplier = 1, check = 1, length = strlen(player->word);
+    int points = 0, check = 1, length = strlen(player->word);
     // multiplier is a word bonus, check for testing if all tiles were already on board, if yes then 1
     // length is the length of the word
-    // check with dictionary
-    if (checkDictionary(*board, *player) == 1) {
-        error("Word is not in the dictionary.");
-        return;
-    }
-    int status = checkWord(board,player);
+    int status = checkWord(board,player); // check if word can be placed in this position
     switch (status) {
         case 0:
-            // put the word on board
-            if (player->word_orientaion == HORIZONTAL) {
-                for (int i = 0; i < length; ++i) {
-                    board->board_tiles[board->xBoard+i-1][board->yBoard-1].tile = player->word[i];
-                    // get bonuses
-                    if (board->board_tiles[board->xBoard+i-1][board->yBoard-1].bonus < -1)
-                        multiplier *= -(board->board_tiles[board->xBoard+i-1][board->yBoard-1].bonus);
-                    if (board->board_tiles[board->xBoard+i-1][board->yBoard-1].bonus > 1)
-                        player->word_status[i] *= board->board_tiles[board->xBoard+i-1][board->yBoard-1].bonus;
-                    board->board_tiles[board->xBoard+i-1][board->yBoard-1].bonus = 0;   // set bonus to 0
-                }
-            } else {
-                for (int i = 0; i < length; ++i) {
-                    board->board_tiles[board->xBoard-1][board->yBoard+i-1].tile = player->word[i];
-                    // get bonuses
-                    if (board->board_tiles[board->xBoard-1][board->yBoard+i-1].bonus < -1)
-                        multiplier *= -(board->board_tiles[board->xBoard-1][board->yBoard+i-1].bonus);
-                    if (board->board_tiles[board->xBoard-1][board->yBoard+i-1].bonus > 1)
-                        player->word_status[i] *= board->board_tiles[board->xBoard-1][board->yBoard+i-1].bonus;
-                    board->board_tiles[board->xBoard-1][board->yBoard+i-1].bonus = 0;   // set bonus to 0
-                }
+            if (checkDictionary(*board, *player) == 1) {        // check all new words with dictionary
+                return;
             }
-            // count point for word
-            points += pointsLettes(player, length);
-            points *= multiplier;       // word bonus is stored in multiplier
-            points += allTilesUsedPoints(player);
+            if (board->firstMove == 1)  // if first move and all checks passed
+                board->firstMove = 0;   // then first move is made
+            // count points
             for (int i = 0; i < PLAYER_TILES; ++i) {        // remove used tiles from hand
                 if (player->tiles[i].used == 1) {
                     player->tiles[i].used = 0;
@@ -299,9 +374,32 @@ void placeWord(board_status_t *board, player_t *player) {
                     check = 0;      // if at least one letter was used than it means the player added letter
                 }
             }
-            board->points[board->player] += points;     // add calculated points to player's score
-            if (check)      // if all tiles were already on board before this move
+            if (check) {      // if all tiles were already on board before this move
                 error("All tiles were already on the board.");
+                break;
+            }
+            // count points of all new words
+            points += countPoints(board, player);
+            // put the word on board, if all checks were positive
+            if (player->word_orientation == HORIZONTAL) {
+                for (int i = 0; i < length; ++i) {
+                    board->board_tiles[board->xBoard+i-1][board->yBoard-1].tile = player->word[i];
+                    // remove bonus value
+                    board->board_tiles[board->xBoard+i-1][board->yBoard-1].bonus = 0;   // set bonus to 0
+                }
+            }
+            else {
+                for (int i = 0; i < length; ++i) {
+                    board->board_tiles[board->xBoard-1][board->yBoard+i-1].tile = player->word[i];
+                    // remove bonus value
+                    board->board_tiles[board->xBoard-1][board->yBoard+i-1].bonus = 0;   // set bonus to 0
+                }
+            }
+
+            points += allTilesUsedPoints(player);
+
+            board->points[board->player] += points;     // add calculated points to player's score
+
             break;
         case 1:
             error("You can't put this word here.");
@@ -318,7 +416,7 @@ void placeWord(board_status_t *board, player_t *player) {
     }
 }
 
-// functions used in exchainge of tiles
+// functions used in exchange of tiles
 // choose tiles and highlight them with background color
 void chooseTiles(board_status_t *board, player_t *player) {
     restartWordStatus(player);
