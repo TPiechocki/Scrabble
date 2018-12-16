@@ -8,7 +8,13 @@ Other line endings will probably cause an uncaught error, because of different c
 
 Changelog:
 
-0.6
+1.0.1
+
+fixes:
+- player could choose empty tiles to exchange
+- player couldn't exchange letters
+
+1.0
 - read a dictionary from a file
 - clear space allocated before closing program(fixed)
 - user can specify dictionary name in command line call "-d name_of_file"

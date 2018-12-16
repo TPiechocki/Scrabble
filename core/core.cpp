@@ -4,10 +4,9 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include"time.h"
+#include<time.h>
 #include"../conio2.h"
 #include"core.h"
-#include "core.h"
 
 
 #ifdef __GNUC__

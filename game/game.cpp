@@ -201,7 +201,7 @@ int positionWord(board_status_t *board, player_t *player) {
     player->word_orientation = HORIZONTAL;
     displayWordInsert(board, player);
     int ch = 0;
-    while (ch != '0x0d' && ch !='0x1b') {       // wait for enter or escape
+    while (ch != 0x0d && ch !=0x1b) {       // wait for enter or escape
         ch = getch();
         switch (ch) {
             case 0:     // arrow which moves cursor
@@ -419,10 +419,9 @@ void placeWord(board_status_t *board, player_t *player) {
 // choose tiles and highlight them with background color
 void chooseTiles(board_status_t *board, player_t *player) {
     restartWordStatus(player);
-    int count = 0; // count number of letters chosen
     int choice = 0;
     do {        // loop ends with confirmation of enter or 'w'
-        count = 0;
+        int count = 0; // count number of letters chosen
         for (int i = 0; i < PLAYER_TILES; ++i) {    // count amount of letters which player want to exchange
             if (player->tiles[i].used == 1)
                 ++count;
@@ -434,7 +433,7 @@ void chooseTiles(board_status_t *board, player_t *player) {
         }
         displayTilesExchange(player->tiles);        // display with highlighted ones
         choice = getch();
-        if (choice > '0' && choice <= '0' + PLAYER_TILES) {
+        if (choice > '0' && choice <= '0' + PLAYER_TILES && player->tiles[choice-'1'].letter != EMPTY) {
             ++player->tiles[choice-'0' - 1].used %= 2;  // switch between 0 and 1
         }
         else if (choice == 0x0d || choice == 'w') {

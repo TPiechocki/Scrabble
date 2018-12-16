@@ -7,9 +7,8 @@
 #include<stdio.h>
 #include<string.h>
 #include"../conio2.h"
-#include"dictionary.h"
 #include"core.h"
-#include "dictionary.h"
+#include"dictionary.h"
 
 
 #ifdef __GNUC__
@@ -25,12 +24,15 @@
 // returns 1 if malloc returned null, if everything is okay returns 0
 // add the word to the list with given previous element, word to insert and length of this word
 int addWord(dict_word_t *previous, char *word, int length) {
-    dict_word_t *x = (dict_word_t *)malloc(sizeof(dict_word_t)+sizeof(char)*(length+1));
+    dict_word_t *x = (dict_word_t *)malloc(sizeof(dict_word_t));
     if (x == NULL)
         return 1;
 	x->word = (char *)malloc(sizeof(char)*(length+1));
-	if (x->word == NULL)
-		return 1;
+	if (x->word == NULL) {
+        free(x->word);
+        free(x);
+        return 1;
+    }
     strcpy(x->word, word);
     x->next = NULL;
     previous->next = x;
@@ -156,13 +158,11 @@ int createDictionary(const char *fileName, board_status_t *board) {
     }
     // initialisation
     board->dictionaryHead.next = NULL;
-    int length;
     char word[100];
-	int status = 0;
     dict_word_t *previous = &board->dictionaryHead;
     while (1) {
-        status = fscanf(words, "%s\n", word);       // returns 1 if ok
-		length = strlen(word);
+        int status = fscanf(words, "%s\n", word);       // returns 1 if ok
+		int length = strlen(word);
 
 		// add word  when there is enough free memory
         if (addWord(previous, word, length) != 0) {
@@ -179,16 +179,6 @@ int createDictionary(const char *fileName, board_status_t *board) {
         }
     }
     fclose(words);
-	
-    FILE *test = fopen("test.txt", "w");
-    dict_word_t *xxx = board->dictionaryHead.next;
-    while (1) {
-       fprintf(test, "%s\n", xxx->word);
-       xxx = xxx->next;
-       if (xxx->next == NULL)      // to not skip last item
-           break;
-    }
-    fclose(test);
     clrscr();
     return 0;
 }
@@ -214,9 +204,8 @@ int checkDictionary(board_status_t board, player_t player) {
 
 EXTERNC
 void clearDictionary(dict_word_t *head) {
-    dict_word_t *temp;
     while (head->next != NULL) {
-        temp = head->next;
+        dict_word_t *temp = head->next;
         head->next = head->next->next;
         free(temp->word);
         free(temp);
